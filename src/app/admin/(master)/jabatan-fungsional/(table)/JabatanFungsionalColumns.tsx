@@ -2,10 +2,10 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
 
-import { Jabatan } from "@/store/jabatan/jabatan.types";
-import { JabatanActions } from "./JabatanActions";
+import { JabatanFungsionalActions } from "./JabatanFungsionalActions";
+import { JabatanFungsional } from "@/store/jabatanFungsional/jabatanFungsional.types";
 
-export const jabatanColumns: ColumnDef<Jabatan>[] = [
+export const jabatanFungsionalColumns: ColumnDef<JabatanFungsional>[] = [
   {
     id: "no",
     header: ({ column }) => (
@@ -17,22 +17,22 @@ export const jabatanColumns: ColumnDef<Jabatan>[] = [
   {
     accessorKey: "nama",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Nama Jabatan" />
+      <DataTableColumnHeader column={column} title="Nama Jabatan Fungsional" />
     ),
     cell: ({ row }) => <span>{row.getValue("nama")}</span>,
   },
   {
-    accessorKey: "gaji",
+    accessorKey: "tunjangan",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Gaji" />
+      <DataTableColumnHeader column={column} title="Tunjangan" />
     ),
-    cell: ({ row }) => <span>{row.getValue("gaji")}</span>,
+    cell: ({ row }) => <span>{row.getValue("tunjangan")}</span>,
   },
   {
     id: "actions",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Action" />
     ),
-    cell: ({ row }) => <JabatanActions row={row} />,
+    cell: ({ row }) => <JabatanFungsionalActions row={row} />,
   },
 ];

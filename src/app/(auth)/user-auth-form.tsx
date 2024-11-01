@@ -45,9 +45,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         setError("Error logging in");
       }
       if (!res?.error) {
-        form.reset();
         router.push(callbackUrl);
         setIsLoading(false);
+        form.reset();
       }
     } catch (error) {
       console.log(error);

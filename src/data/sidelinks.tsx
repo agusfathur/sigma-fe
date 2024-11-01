@@ -1,17 +1,9 @@
 import {
-  IconApps,
-  IconBoxSeam,
-  IconChecklist,
-  IconHexagonNumber1,
-  IconHexagonNumber2,
   IconHexagonNumber3,
   IconHexagonNumber4,
   IconHexagonNumber5,
   IconLayoutDashboard,
-  IconUserShield,
   IconDatabasePlus,
-  IconDatabaseHeart,
-  IconUserBolt,
   IconUserCog,
 } from "@tabler/icons-react";
 
@@ -46,10 +38,10 @@ export const sidelinks: SideLink[] = [
         icon: <IconUserCog size={18} />,
       },
       {
-        title: "Sign In (Box)",
+        title: "Jabatan Fungsional",
         label: "",
-        href: "/sign-in-2",
-        icon: <IconHexagonNumber2 size={18} />,
+        href: "/admin/jabatan-fungsional",
+        icon: <IconUserCog size={18} />,
       },
       {
         title: "Sign Up",

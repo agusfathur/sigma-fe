@@ -6,7 +6,7 @@ import { jabatanColumns } from "./JabatanColumns";
 import Modal from "@/components/custom/modal";
 import JabatanCreateForm from "../(form)/JabatanCreateForm";
 import ModalDelete from "@/components/custom/modal-delete";
-import JabatanEditForm from "../(form)/jabatanEditForm";
+import JabatanEditForm from "../(form)/JabatanEditForm";
 
 const JabatanTable = () => {
   const fetchJabatan = useJabatanStore((state) => state.fetchJabatan);

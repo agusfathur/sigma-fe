@@ -2,7 +2,6 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
   CaretSortIcon,
-  EyeNoneIcon,
 } from "@radix-ui/react-icons";
 import { Column } from "@tanstack/react-table";
 
@@ -31,14 +30,13 @@ export function DataTableColumnHeader<TData, TValue>({
 }: DataTableColumnHeaderProps<TData, TValue>) {
   if (sortable === false) {
     return (
-      <div
-        className={cn(
-          "flex items-center text-sm text-slate-900 hover:cursor-pointer dark:text-white",
-          className,
-        )}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="-ml-3 h-8 text-sm text-slate-900 data-[state=open]:bg-accent dark:text-white"
       >
         <span>{title}</span>
-      </div>
+      </Button>
     );
   }
 
@@ -71,10 +69,6 @@ export function DataTableColumnHeader<TData, TValue>({
             Desc
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          {/* <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
-            <EyeNoneIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Hide
-          </DropdownMenuItem> */}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
