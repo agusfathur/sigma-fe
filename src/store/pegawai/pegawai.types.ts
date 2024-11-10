@@ -1,0 +1,103 @@
+import { Jabatan } from "../jabatan/jabatan.types";
+import { JabatanFungsional } from "../jabatanFungsional/jabatanFungsional.types";
+import { Lokasi } from "../lokasi/lokasi.types";
+import { User } from "../user/user.types";
+
+export type Pegawai = {
+  id_pegawai: string;
+  nama: string;
+  email: string;
+  nomor_hp: string;
+  foto: string;
+  nik: string;
+  nip: string;
+  tempat_lahir: string;
+  tanggal_lahir: string;
+  tanggal_masuk: string;
+  tanggal_pensiun: string;
+  gender: string;
+  agama: string;
+  alamat: string;
+  tenaga: string;
+  jabatan_id: string;
+  status_kepegawaian_id: string;
+  riwayat_pendidikan: string[];
+  status_pernikahan: string;
+  jumlah_istri: number;
+  jumlah_anak: number;
+  nomor_rekening: string;
+  status_pegawai: string;
+  user_id: string;
+  lokasi_id: string;
+  jabatan: Jabatan;
+  jabatanFungsional: {
+    pegawai_id: string;
+    jabatan_fungsional_id: string;
+    JabatanFungsional: JabatanFungsional;
+  }[];
+  data_lokasi: Lokasi;
+  user: User;
+};
+
+export type PegawaiCreate = {
+  // user
+  nama: string;
+  email: string;
+  username: string;
+  password: string;
+  role: string;
+  nomor_hp: string;
+  nik: string;
+  nip: string;
+  foto: File;
+  tempat_lahir: string;
+  tanggal_lahir: string;
+  tanggal_masuk: string;
+  tanggal_pensiun: string;
+  gender: string;
+  agama: string;
+  alamat: string;
+  tenaga: string;
+  jabatan_id: string;
+  status_kepegawaian_id: string;
+  riwayat_pendidikan?: string[];
+  status_pernikahan: string;
+  jumlah_istri: number;
+  jumlah_anak: number;
+  nomor_rekening?: string;
+  status_pegawai: string;
+  lokasi_id: string;
+  jabatan_fungsional_id?: string[];
+};
+
+export type PegawaiUpdate = {
+  id_pegawai: string;
+  // user
+  nama: string;
+  email: string;
+  username: string;
+  password?: string;
+  role: string;
+  nomor_hp: string;
+  nik: string;
+  nip: string;
+  foto?: File;
+  tempat_lahir: string;
+  tanggal_lahir: string;
+  tanggal_masuk: string;
+  tanggal_pensiun: string;
+  gender: string;
+  agama: string;
+  alamat: string;
+  tenaga: string;
+  jabatan_id: string;
+  status_kepegawaian_id: string;
+  riwayat_pendidikan?: string[];
+  status_pernikahan: string;
+  jumlah_istri: number;
+  jumlah_anak: number;
+  nomor_rekening?: string;
+  status_pegawai: string;
+  lokasi_id: string;
+  jabatan_fungsional_id?: string[];
+};
