@@ -4,7 +4,6 @@ import { DataTable } from "@/components/table/data-table";
 import { useEffect, useState } from "react";
 import Modal from "@/components/custom/modal";
 import ModalDelete from "@/components/custom/modal-delete";
-import StatusPegawaiUpdateForm from "../(form)/PegawaiEditForm";
 import { usePegawaiStore } from "@/store/pegawai/pegawaiStore";
 import { pegawaiColumns } from "./PegawaiColumns";
 import PegawaiCreateForm from "../(form)/PegawaiCreateForm";

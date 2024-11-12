@@ -7,6 +7,11 @@ interface JadwalKerjaState {
   jadwalKerja: JadwalKerja[];
   fetchJadwalKerja: () => Promise<void>;
   insertJadwalKerja: (jadwalKerja: JadwalKerjaCreate) => Promise<any>;
+  fetchJadwalKerjaByFilter: (filter: string) => Promise<any>;
+  fetchJadwalKerjaPegawaiByFilter: (
+    filter: string,
+    pegawaiId: string,
+  ) => Promise<any>;
   updateJadwalKerja: (jadwalKerja: JadwalKerja) => Promise<any>;
   deleteJadwalKerja: (id: string) => Promise<any>;
   jadwalKerjaById: (id: string) => JadwalKerja | undefined;
@@ -15,6 +20,8 @@ interface JadwalKerjaState {
   isModalDeleteOpen: boolean;
   setIsModalDeleteOpen: (isModalDeleteOpen: boolean) => void;
   jadwalKerjaData: JadwalKerja | undefined;
+  isModalFilterOpen: boolean;
+  setIsModalFilterOpen: (isModalFilterOpen: boolean) => void;
   setJadwalKerjaData: (JadwalKerja: JadwalKerja | undefined) => void;
 }
 
@@ -24,6 +31,31 @@ export const useJadwalKerjaStore = create<JadwalKerjaState>((set, get) => ({
     try {
       const res = await axiosJWT.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/jadwal-pegawai`,
+      );
+
+      set({ jadwalKerja: res.data.data });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  fetchJadwalKerjaByFilter: async (filter: string) => {
+    try {
+      const res = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/jadwal-pegawai?${filter}`,
+      );
+
+      set({ jadwalKerja: res.data.data });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  fetchJadwalKerjaPegawaiByFilter: async (
+    filter: string,
+    pegawaiId: string,
+  ) => {
+    try {
+      const res = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/jadwal-pegawai/pegawai/${pegawaiId}?${filter}`,
       );
 
       set({ jadwalKerja: res.data.data });
@@ -78,6 +110,9 @@ export const useJadwalKerjaStore = create<JadwalKerjaState>((set, get) => ({
   setIsModalDeleteOpen: (isModalDeleteOpen: boolean) =>
     set({ isModalDeleteOpen }),
   jadwalKerjaData: {} as JadwalKerja | undefined,
+  isModalFilterOpen: false,
+  setIsModalFilterOpen: (isModalFilterOpen: boolean) =>
+    set({ isModalFilterOpen }),
   setJadwalKerjaData: (jadwalKerjaData: JadwalKerja | undefined) =>
     set({ jadwalKerjaData }),
 }));

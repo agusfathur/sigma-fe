@@ -10,8 +10,8 @@ import {
   IconCalendarEvent,
   IconCalendarSmile,
   IconParking,
-  IconUsers,
   IconUsersGroup,
+  IconArrowRightToArc,
 } from "@tabler/icons-react";
 
 export interface NavLink {
@@ -108,12 +108,12 @@ export const sidelinks: SideLink[] = [
       },
     ],
   },
-  // {
-  //   title: "Tasks",
-  //   label: "3",
-  //   href: "/tasks",
-  //   icon: <IconChecklist size={18} />,
-  // },
+  {
+    title: "Absensi",
+    label: "",
+    href: "/admin/absensi",
+    icon: <IconArrowRightToArc size={18} />,
+  },
   // {
   //   title: "Apps",
   //   label: "",

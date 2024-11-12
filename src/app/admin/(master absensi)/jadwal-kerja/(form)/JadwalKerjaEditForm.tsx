@@ -21,13 +21,17 @@ import {
   TypeJadwalKerjaUpdate,
 } from "./JadwalKerjaSchema";
 import { useJamKerjaStore } from "@/store/jamKerja/jamKerjaStore";
+import { Pegawai } from "@/store/pegawai/pegawai.types";
+import { usePegawaiStore } from "@/store/pegawai/pegawaiStore";
 
 interface JadwalKerjaUpdateFormProps {
   onSuccess: () => void;
+  pegawaiDataProps?: Pegawai;
 }
 
 export default function StatusPegawaiUpdateForm({
   onSuccess,
+  pegawaiDataProps,
 }: JadwalKerjaUpdateFormProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,6 +40,15 @@ export default function StatusPegawaiUpdateForm({
   const [tanggal, setTanggal] = useState<string>(
     jadwalKerjaData?.tanggal.split("T")[0] || "",
   );
+  const fetchPegawai = usePegawaiStore((state) => state.fetchPegawai);
+  const getPegawai = usePegawaiStore((state) => state.pegawaiById);
+
+  let pegawai;
+  if (pegawaiDataProps) {
+    pegawai = pegawaiDataProps;
+  } else {
+    pegawai = getPegawai(jadwalKerjaData?.pegawai_id || "");
+  }
 
   const updateJadwalKerja = useJadwalKerjaStore(
     (state) => state.updateJadwalKerja,
@@ -51,13 +64,14 @@ export default function StatusPegawaiUpdateForm({
 
   useEffect(() => {
     fetchJamKerja();
-  }, [fetchJamKerja]);
+    fetchPegawai();
+  }, [fetchJamKerja, fetchPegawai]);
 
   const formJadwalKerja = useForm<TypeJadwalKerjaUpdate>({
     resolver: zodResolver(JadwalKerjaUpdateSchema),
     defaultValues: {
       id_jadwal: jadwalKerjaData?.id_jadwal || "",
-      pegawai_id: jadwalKerjaData?.pegawai_id || "",
+      pegawai_id: pegawai?.nama || "",
       shift_id: jadwalKerjaData?.shift_id || "",
       tanggal: jadwalKerjaData?.tanggal.split("T")[0] || "",
     },
@@ -68,7 +82,7 @@ export default function StatusPegawaiUpdateForm({
     try {
       const res = await updateJadwalKerja({
         id_jadwal: data.id_jadwal,
-        pegawai_id: data.pegawai_id,
+        pegawai_id: jadwalKerjaData?.pegawai_id,
         shift_id: data.shift_id,
         tanggal: tanggal + "T00:00:00.000Z",
       });

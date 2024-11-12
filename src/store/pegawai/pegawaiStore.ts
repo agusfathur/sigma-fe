@@ -2,7 +2,6 @@
 import { create } from "zustand";
 import { Pegawai, PegawaiCreate, PegawaiUpdate } from "./pegawai.types";
 import axiosJWT from "@/lib/authJWT";
-import { trackFallbackParamAccessed } from "next/dist/server/app-render/dynamic-rendering";
 
 interface PegawaiState {
   pegawai: Pegawai[];

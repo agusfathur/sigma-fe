@@ -22,13 +22,16 @@ import {
 import { useJamKerjaStore } from "@/store/jamKerja/jamKerjaStore";
 import { usePegawaiStore } from "@/store/pegawai/pegawaiStore";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Pegawai } from "@/store/pegawai/pegawai.types";
 
 interface JadwalKerjaCreateFormProps {
   onSuccess: () => void;
+  pegawaiDataProps?: Pegawai;
 }
 
 export default function JadwalKerjaCreateForm({
   onSuccess,
+  pegawaiDataProps,
 }: JadwalKerjaCreateFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [tanggalSenin, setTanggalSenin] = useState("");
@@ -43,11 +46,21 @@ export default function JadwalKerjaCreateForm({
   const pegawais = usePegawaiStore((state) => state.pegawai);
   const fetchJamKerja = useJamKerjaStore((state) => state.fetchJamKerja);
   const jamKerja = useJamKerjaStore((state) => state.jamKerja);
-  const pegawaiOptions = pegawais.map((pegawai) => ({
-    value: pegawai.id_pegawai,
-    label: pegawai.nama,
-  }));
+  let pegawaiOptions;
 
+  if (pegawaiDataProps) {
+    pegawaiOptions = [
+      {
+        value: pegawaiDataProps.id_pegawai,
+        label: pegawaiDataProps.nama,
+      },
+    ];
+  } else {
+    pegawaiOptions = pegawais.map((pegawai) => ({
+      value: pegawai.id_pegawai,
+      label: pegawai.nama,
+    }));
+  }
   const jamKerjaOptions = jamKerja.map((jamKerja) => ({
     value: jamKerja.id_shift_kerja,
     label: `${jamKerja.waktu_masuk}-${jamKerja.waktu_pulang} | ${jamKerja.keterangan}`,

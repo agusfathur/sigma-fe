@@ -1,11 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
 import { Pegawai } from "@/store/pegawai/pegawai.types";
-import { PegawaiActions } from "./PegawaiActions";
 import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/custom/button";
+import { GearIcon } from "@radix-ui/react-icons";
+import { usePegawaiStore } from "@/store/pegawai/pegawaiStore";
 
-export const pegawaiColumns: ColumnDef<Pegawai>[] = [
+export const absensiPegawaiColumns: ColumnDef<Pegawai>[] = [
   {
     id: "no",
     header: ({ column }) => (
@@ -57,3 +61,19 @@ export const pegawaiColumns: ColumnDef<Pegawai>[] = [
     cell: ({ row }) => <PegawaiActions row={row} />,
   },
 ];
+
+const PegawaiActions = ({ row }: any) => {
+  const setPegawaiData = usePegawaiStore((state) => state.setPegawaiData);
+
+  return (
+    <Link
+      href={`/admin/jadwal-kerja/pegawai/${row.original.id_pegawai}`}
+      onClick={() => setPegawaiData(row.original)}
+    >
+      <Button className="h-8 w-8 p-0">
+        <span className="sr-only">Detail</span>
+        <GearIcon className="h-4 w-4" />
+      </Button>
+    </Link>
+  );
+};
