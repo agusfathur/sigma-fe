@@ -12,41 +12,38 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import { JadwalKerja } from "@/store/jadwalKerja/jadwalKerja.types";
-import { useJadwalKerjaStore } from "@/store/jadwalKerja/jadwalKerjaStore";
+import { useTHRStore } from "@/store/THR/THRStore";
+import { THR } from "@/store/THR/THR.types";
 
-interface DataTableRowActionsProps<JadwalKerja> {
-  row: Row<JadwalKerja>;
+interface DataTableRowActionsProps<THR> {
+  row: Row<THR>;
 }
 
-export function JadwalKerjaActions({
-  row,
-}: DataTableRowActionsProps<JadwalKerja>) {
+export function THRActions({ row }: DataTableRowActionsProps<THR>) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const setIsModalDeleteOpen = useJadwalKerjaStore(
+  const setIsModalDeleteOpen = useTHRStore(
     (state) => state.setIsModalDeleteOpen,
   );
-  const setIsModalEditOpen = useJadwalKerjaStore(
-    (state) => state.setIsModalEditOpen,
-  );
-
-  const setJadwalKerjaData = useJadwalKerjaStore(
-    (state) => state.setJadwalKerjaData,
-  );
-
-  const setData = (row: JadwalKerja) => {
-    setJadwalKerjaData(row);
-  };
-
-  const handleDelete = (row: JadwalKerja) => {
+  const setIsModalEditOpen = useTHRStore((state) => state.setIsModalEditOpen);
+  const setTHRData = useTHRStore((state) => state.setTHRData);
+  // const setIsModalDetailOpen = useTHRStore(
+  //   (state) => state.setIsModalDetailOpen,
+  // );
+  const handleDelete = (row: THR) => {
     setIsModalDeleteOpen(true);
-    setData(row);
+    setTHRData(row);
   };
-  const handleEdit = (row: JadwalKerja) => {
-    setJadwalKerjaData(row);
+
+  const handleEdit = (row: THR) => {
+    setTHRData(row);
     setIsModalEditOpen(true);
   };
+  // const handleDetail = (row: THR) => {
+  //   setTHRData(row);
+  //   setIsModalDetailOpen(true);
+  // };
+
   return (
     <DropdownMenu onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>

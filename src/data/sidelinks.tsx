@@ -12,6 +12,14 @@ import {
   IconParking,
   IconUsersGroup,
   IconArrowRightToArc,
+  IconClover,
+  IconTimeline,
+  IconMessage2Up,
+  IconMapDollar,
+  IconMoonStars,
+  IconUserDollar,
+  IconMoodDollar,
+  IconMapPinDollar,
 } from "@tabler/icons-react";
 
 export interface NavLink {
@@ -114,12 +122,58 @@ export const sidelinks: SideLink[] = [
     href: "/admin/absensi",
     icon: <IconArrowRightToArc size={18} />,
   },
-  // {
-  //   title: "Apps",
-  //   label: "",
-  //   href: "/apps",
-  //   icon: <IconApps size={18} />,
-  // },
+  {
+    title: "Data Absensi",
+    label: "",
+    href: "",
+    icon: <IconTimeline size={18} />,
+    sub: [
+      {
+        title: "Lembur",
+        label: "",
+        href: "/admin/lembur",
+        icon: <IconClover size={18} />,
+      },
+      {
+        title: "Permohonan Izin",
+        label: "",
+        href: "/admin/permohonan-izin",
+        icon: <IconMessage2Up size={18} />,
+      },
+    ],
+  },
+  {
+    title: "Data Tunjangan",
+    label: "",
+    href: "",
+    icon: <IconMapDollar size={18} />,
+    sub: [
+      {
+        title: "Tunjangan Tetap",
+        label: "",
+        href: "/admin/tunjangan-tetap",
+        icon: <IconUserDollar size={18} />,
+      },
+      {
+        title: "Tunjangan Kehadiran",
+        label: "",
+        href: "/admin/tunjangan-kehadiran",
+        icon: <IconMapPinDollar size={18} />,
+      },
+      {
+        title: "Tunjangan Bonus",
+        label: "",
+        href: "/admin/tunjangan-bonus",
+        icon: <IconMoodDollar size={18} />,
+      },
+      {
+        title: "Tunjangan Hari Raya",
+        label: "",
+        href: "/admin/tunjangan-hari-raya",
+        icon: <IconMoonStars size={18} />,
+      },
+    ],
+  },
   // {
   //   title: "Category",
   //   label: "",

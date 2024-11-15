@@ -33,6 +33,7 @@ export const usePegawaiStore = create<PegawaiState>((set, get) => ({
       console.log(error);
     }
   },
+
   insertPegawai: async (pegawai: PegawaiCreate) => {
     console.log(pegawai);
     const formData = new FormData();

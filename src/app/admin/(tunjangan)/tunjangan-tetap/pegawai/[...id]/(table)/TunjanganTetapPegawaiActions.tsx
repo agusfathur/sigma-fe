@@ -12,41 +12,44 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import { JadwalKerja } from "@/store/jadwalKerja/jadwalKerja.types";
-import { useJadwalKerjaStore } from "@/store/jadwalKerja/jadwalKerjaStore";
+import { TunjanganTetapPegawai } from "@/store/tunjanganTetap/tunjanganTetapPegawai,types";
+import { useTunjanganTetapPegawaiStore } from "@/store/tunjanganTetap/tunjanganTetapPegawaiStore";
 
-interface DataTableRowActionsProps<JadwalKerja> {
-  row: Row<JadwalKerja>;
+interface DataTableRowActionsProps<TunjanganTetapPegawai> {
+  row: Row<TunjanganTetapPegawai>;
 }
 
-export function JadwalKerjaActions({
+export function TunjanganTetapPegawaiActions({
   row,
-}: DataTableRowActionsProps<JadwalKerja>) {
+}: DataTableRowActionsProps<TunjanganTetapPegawai>) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const setIsModalDeleteOpen = useJadwalKerjaStore(
+  const setIsModalDeleteOpen = useTunjanganTetapPegawaiStore(
     (state) => state.setIsModalDeleteOpen,
   );
-  const setIsModalEditOpen = useJadwalKerjaStore(
+  const setIsModalEditOpen = useTunjanganTetapPegawaiStore(
     (state) => state.setIsModalEditOpen,
   );
-
-  const setJadwalKerjaData = useJadwalKerjaStore(
-    (state) => state.setJadwalKerjaData,
+  const setTunjanganTetapPegawaiData = useTunjanganTetapPegawaiStore(
+    (state) => state.setTunjanganTetapPegawaiData,
   );
-
-  const setData = (row: JadwalKerja) => {
-    setJadwalKerjaData(row);
-  };
-
-  const handleDelete = (row: JadwalKerja) => {
+  // const setIsModalDetailOpen = useTHRStore(
+  //   (state) => state.setIsModalDetailOpen,
+  // );
+  const handleDelete = (row: TunjanganTetapPegawai) => {
+    setTunjanganTetapPegawaiData(row);
     setIsModalDeleteOpen(true);
-    setData(row);
   };
-  const handleEdit = (row: JadwalKerja) => {
-    setJadwalKerjaData(row);
+
+  const handleEdit = (row: TunjanganTetapPegawai) => {
+    setTunjanganTetapPegawaiData(row);
     setIsModalEditOpen(true);
   };
+  // const handleDetail = (row: THR) => {
+  //   setTunjanganTetapPegawaiData(row);
+  //   setIsModalDetailOpen(true);
+  // };
+
   return (
     <DropdownMenu onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>

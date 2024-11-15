@@ -12,41 +12,44 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import { JadwalKerja } from "@/store/jadwalKerja/jadwalKerja.types";
-import { useJadwalKerjaStore } from "@/store/jadwalKerja/jadwalKerjaStore";
+import { TunjanganKehadiran } from "@/store/tunjanganKehadiran/tunjanganKehadiran.types";
+import { useTunjanganKehadiranStore } from "@/store/tunjanganKehadiran/tunjanganKehadiranStore";
 
-interface DataTableRowActionsProps<JadwalKerja> {
-  row: Row<JadwalKerja>;
+interface DataTableRowActionsProps<TunjanganKehadiran> {
+  row: Row<TunjanganKehadiran>;
 }
 
-export function JadwalKerjaActions({
+export function TunjanganKehadiranActions({
   row,
-}: DataTableRowActionsProps<JadwalKerja>) {
+}: DataTableRowActionsProps<TunjanganKehadiran>) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const setIsModalDeleteOpen = useJadwalKerjaStore(
+  const setIsModalDeleteOpen = useTunjanganKehadiranStore(
     (state) => state.setIsModalDeleteOpen,
   );
-  const setIsModalEditOpen = useJadwalKerjaStore(
+  const setIsModalEditOpen = useTunjanganKehadiranStore(
     (state) => state.setIsModalEditOpen,
   );
-
-  const setJadwalKerjaData = useJadwalKerjaStore(
-    (state) => state.setJadwalKerjaData,
+  const setTunjanganKehadiran = useTunjanganKehadiranStore(
+    (state) => state.setTunjanganKehadiran,
   );
-
-  const setData = (row: JadwalKerja) => {
-    setJadwalKerjaData(row);
-  };
-
-  const handleDelete = (row: JadwalKerja) => {
+  // const setIsModalDetailOpen = useTHRStore(
+  //   (state) => state.setIsModalDetailOpen,
+  // );
+  const handleDelete = (row: TunjanganKehadiran) => {
+    setTunjanganKehadiran(row);
     setIsModalDeleteOpen(true);
-    setData(row);
   };
-  const handleEdit = (row: JadwalKerja) => {
-    setJadwalKerjaData(row);
+
+  const handleEdit = (row: TunjanganKehadiran) => {
+    setTunjanganKehadiran(row);
     setIsModalEditOpen(true);
   };
+  // const handleDetail = (row: THR) => {
+  //   setTunjanganKehadiran(row);
+  //   setIsModalDetailOpen(true);
+  // };
+
   return (
     <DropdownMenu onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>

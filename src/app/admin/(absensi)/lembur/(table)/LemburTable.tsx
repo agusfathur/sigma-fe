@@ -1,18 +1,55 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { DataTable } from "@/components/table/data-table";
 import { useEffect, useState } from "react";
+import Select from "react-select";
 import Modal from "@/components/custom/modal";
-import { useAbsensiStore } from "@/store/absensi/absensiStore";
-import { absensiColumns } from "./AbsensiColumns";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {} from "@/store/absensi/absensiStore";
 import { useJamKerjaStore } from "@/store/jamKerja/jamKerjaStore";
 import { Button } from "@/components/custom/button";
-import AbsensiPegawaiTable from "../(table pegawai)/AbsensiPegawaiTable";
+import { lemburColumns } from "./LemburColumns";
+import { useLemburStore } from "@/store/lembur/lemburStore";
+import Image from "next/image";
 
-const AbsensiTable = () => {
-  const [query, setQuery] = useState("");
+const LemburTable = () => {
+  const lemburs = useLemburStore((state) => state.lembur);
+
+  const fetchJamKerja = useJamKerjaStore((state) => state.fetchJamKerja);
+
+  const fetchAllLemburByFilter = useLemburStore(
+    (state) => state.fetchAllLemburByFilter,
+  );
+
+  const isModalFilterOpen = useLemburStore((state) => state.isModalFilterOpen);
+  const setIsModalFilterOpen = useLemburStore(
+    (state) => state.setIsModalFilterOpen,
+  );
+
+  const isModalEditOpen = useLemburStore((state) => state.isModalEditOpen);
+  const setIsModalEditOpen = useLemburStore(
+    (state) => state.setIsModalEditOpen,
+  );
+
+  const isModalDetailOpen = useLemburStore((state) => state.isModalDetailOpen);
+  const setIsModalDetailOpen = useLemburStore(
+    (state) => state.setIsModalDetailOpen,
+  );
+  const lemburData = useLemburStore((state) => state.lemburData);
+  const updateStatusLembur = useLemburStore(
+    (state) => state.updateStatusLembur,
+  );
+
+  const [statusLembur, setStatusLembur] = useState<string>(
+    lemburData?.status_lembur || "",
+  );
+  const statusOptions = [
+    { value: "pending", label: "pending" },
+    { value: "diterima", label: "diterima" },
+    { value: "ditolak", label: "ditolak" },
+    { value: "proses", label: "proses" },
+  ];
+
   const [tahunOptions, setTahunOptions] = useState<
     { value: string; label: string }[]
   >([]);
@@ -23,31 +60,6 @@ const AbsensiTable = () => {
   const [filterTahun, setFilterTahun] = useState("");
   const [filterBulan, setFilterBulan] = useState("");
   const [filterTanggal, setFilterTanggal] = useState("");
-  const [textFilter, setTextFilter] = useState("Hari Ini");
-
-  const absensis = useAbsensiStore((state) => state.absensi);
-
-  const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
-
-  const absensiData = useAbsensiStore((state) => state.absensiData);
-
-  const isModalKoordinatOpen = useAbsensiStore(
-    (state) => state.isModalKoordinatOpen,
-  );
-  const setIsModalKoordinatOpen = useAbsensiStore(
-    (state) => state.setIsModalKoordinatOpen,
-  );
-
-  const fetchJamKerja = useJamKerjaStore((state) => state.fetchJamKerja);
-
-  const fetchAbsensiByFilter = useAbsensiStore(
-    (state) => state.fetchAllAbsensiByFilter,
-  );
-
-  const isModalFilterOpen = useAbsensiStore((state) => state.isModalFilterOpen);
-  const setIsModalFilterOpen = useAbsensiStore(
-    (state) => state.setIsModalFilterOpen,
-  );
 
   const getTahunOption = () => {
     const tahun = new Date().getFullYear(); // Mendapatkan tahun saat ini
@@ -114,6 +126,33 @@ const AbsensiTable = () => {
 
     setBulanOptions(options);
   };
+
+  const getMonthName = (monthNumber: number) => {
+    const months = [
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ];
+
+    return months[monthNumber - 1]; // monthNumber dimulai dari 1, jadi kurangi 1 untuk akses array
+  };
+
+  const date = new Date();
+  const [query, setQuery] = useState(
+    `bulan=${date.getMonth() + 1}&tahun=${date.getFullYear()}`,
+  );
+  const [textFilter, setTextFilter] = useState(`
+    ${getMonthName(date.getMonth() + 1)} ${date.getFullYear()}`);
+
   const buildDateFilter = (
     filterTanggal: string,
     filterBulan: string,
@@ -121,24 +160,7 @@ const AbsensiTable = () => {
   ) => {
     const today = new Date();
     const currentYear = today.getFullYear();
-    const getMonthName = (monthNumber: number) => {
-      const months = [
-        "Januari",
-        "Februari",
-        "Maret",
-        "April",
-        "Mei",
-        "Juni",
-        "Juli",
-        "Agustus",
-        "September",
-        "Oktober",
-        "November",
-        "Desember",
-      ];
 
-      return months[monthNumber - 1]; // monthNumber dimulai dari 1, jadi kurangi 1 untuk akses array
-    };
     if (filterTanggal) {
       setTextFilter(`Tanggal ${filterTanggal}`);
       return `tanggal=${filterTanggal}`;
@@ -154,56 +176,83 @@ const AbsensiTable = () => {
 
   const handleFilter = async () => {
     const filter = buildDateFilter(filterTanggal, filterBulan, filterTahun);
-    await fetchAbsensiByFilter(filter);
+    setQuery(filter);
+    await fetchAllLemburByFilter(query);
+  };
+
+  const handleUpdate = async () => {
+    try {
+      await updateStatusLembur(
+        statusLembur as string,
+        lemburData?.id_lembur as string,
+      );
+      await fetchAllLemburByFilter(query);
+      setIsModalEditOpen(false);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
     fetchJamKerja();
     getTahunOption();
     getBulanOption();
-    const date = new Date();
-
-    // Menyesuaikan waktu agar sesuai dengan GMT+7
-    date.setHours(date.getHours() + 7);
-
-    const thisDay = "tanggal=" + date.toISOString().split("T")[0];
-    fetchAbsensiByFilter(query !== "" ? query : thisDay);
-  }, [fetchAbsensiByFilter, fetchJamKerja, query]);
+    fetchAllLemburByFilter(query);
+    setStatusLembur(lemburData?.status_lembur || "");
+  }, [fetchAllLemburByFilter, fetchJamKerja, query, lemburData?.status_lembur]);
 
   return (
     <>
-      <Tabs orientation="vertical" defaultValue="table" className="space-y-4">
-        <div className="w-full overflow-x-auto pb-2">
-          <TabsList>
-            <TabsTrigger value="table">Table</TabsTrigger>
-            <TabsTrigger value="pegawai">Pegawai</TabsTrigger>
-          </TabsList>
-        </div>
-        <TabsContent value="table" className="space-y-4">
-          <>
-            <h3>
-              Filter : <span>{textFilter}</span>
-            </h3>
-            <DataTable
-              data={absensis}
-              columns={absensiColumns}
-              onFilterChange={() => setIsModalFilterOpen(true)}
-              // onClickTambah={() => setIsModalCreateOpen(true)}
-            />
-          </>
-        </TabsContent>
-        <TabsContent value="pegawai">
-          <AbsensiPegawaiTable />
-        </TabsContent>
-      </Tabs>
+      <div className="space-y-4">
+        <h3>
+          Filter : <span>{textFilter}</span>
+        </h3>
+        <DataTable
+          data={lemburs}
+          columns={lemburColumns}
+          onFilterChange={() => setIsModalFilterOpen(true)}
+          // onClickTambah={() => setIsModalCreateOpen(true)}
+        />
+      </div>
+
       {/* modal div */}
       <>
         <Modal
-          isOpen={isModalCreateOpen}
-          textHeader="Create Pegawai"
-          onClose={() => setIsModalCreateOpen(false)}
+          isOpen={isModalEditOpen}
+          textHeader="Update Status Lembur"
+          heightScreenSize="lg"
+          onClose={() => setIsModalEditOpen(false)}
         >
-          <p>s</p>
+          <Select
+            options={statusOptions}
+            className="w-full rounded-md dark:text-black"
+            classNamePrefix="react-select"
+            placeholder="Select status lembur"
+            theme={(theme) => ({
+              ...theme,
+              colors: {
+                ...theme.colors,
+                primary: "black", // Warna border saat di-focus
+                primary25: "#e5e7eb", // Warna abu-abu terang saat di-hover
+                primary50: "#d1d5db", // Warna abu-abu saat di-click
+                neutral20: "black", // Border default
+                neutral80: "black",
+              },
+            })}
+            onChange={(selectedOption) =>
+              setStatusLembur(
+                selectedOption ? String(selectedOption.value) : "",
+              )
+            }
+            value={
+              statusOptions.find(
+                (option: any) => String(option.value) === String(statusLembur),
+              ) || null
+            }
+          />
+          <Button onClick={handleUpdate} className="mt-48 w-full">
+            Update
+          </Button>
         </Modal>
 
         {/* filter */}
@@ -266,18 +315,60 @@ const AbsensiTable = () => {
 
         {/* detail koordinat */}
         <Modal
-          isOpen={isModalKoordinatOpen}
-          textHeader="Koordinat Absen"
+          isOpen={isModalDetailOpen}
+          textHeader="Detail Lembur"
           widthScreenSize="2xl"
-          onClose={() => setIsModalKoordinatOpen(false)}
+          onClose={() => setIsModalDetailOpen(false)}
         >
           <div className="flex justify-between space-x-2">
             <div>
+              <h2 className="mb-2">Foto Pulang</h2>
+              {lemburData?.absensi?.foto_masuk ? (
+                <Image
+                  src={lemburData?.absensi?.foto_masuk}
+                  alt="image"
+                  width={300}
+                  height={300}
+                  className="rounded-md"
+                />
+              ) : (
+                <div className="flex h-72 w-[300px] items-center justify-center rounded-md bg-gray-200 md:w-[300px]">
+                  <p className="text-center text-sm font-semibold text-gray-600">
+                    Tidak Ada Foto masuk
+                    <br />
+                    atau belum masuk
+                  </p>
+                </div>
+              )}
+            </div>
+            <div>
+              <h2 className="mb-2">Foto Pulang</h2>
+              {lemburData?.absensi?.foto_pulang ? (
+                <Image
+                  src={lemburData?.absensi?.foto_pulang}
+                  alt="image"
+                  width={300}
+                  height={300}
+                  className="rounded-md"
+                />
+              ) : (
+                <div className="flex h-72 w-[300px] items-center justify-center rounded-md bg-gray-200 md:w-[300px]">
+                  <p className="text-center text-sm font-semibold text-gray-600">
+                    Tidak Ada Foto pulang
+                    <br />
+                    atau belum pulang
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex justify-between space-x-2">
+            <div>
               <h2 className="mb-2">Koordinat Masuk</h2>
-              {absensiData?.koordinat_masuk ? (
+              {lemburData?.absensi?.koordinat_masuk ? (
                 <iframe
                   id="googleMap"
-                  src={`https://maps.google.com/maps?q=${absensiData?.koordinat_masuk?.split(",")[0]},${absensiData?.koordinat_masuk?.split(",")[1]}&z=15&output=embed&layer=t`}
+                  src={`https://maps.google.com/maps?q=${lemburData?.absensi?.koordinat_masuk.split(",")[0]},${lemburData?.absensi?.koordinat_masuk.split(",")[1]}&z=15&output=embed&layer=t`}
                   className="h-72 w-[300px] rounded-md md:w-[300px]"
                   style={{ border: 0 }}
                   allowFullScreen={true}
@@ -295,10 +386,10 @@ const AbsensiTable = () => {
             </div>
             <div>
               <h2 className="mb-2">Koordinat Pulang</h2>
-              {absensiData?.koordinat_pulang ? (
+              {lemburData?.absensi?.koordinat_pulang ? (
                 <iframe
                   id="googleMap"
-                  src={`https://maps.google.com/maps?q=${absensiData?.koordinat_pulang?.split(",")[0]},${absensiData?.koordinat_pulang?.split(",")[1]}&z=15&output=embed&layer=t`}
+                  src={`https://maps.google.com/maps?q=${lemburData?.absensi?.koordinat_pulang?.split(",")[0]},${lemburData?.absensi?.koordinat_pulang?.split(",")[1]}&z=15&output=embed&layer=t`}
                   className="h-72 w-[300px] rounded-md md:w-[300px]"
                   style={{ border: 0 }}
                   allowFullScreen={true}
@@ -321,4 +412,4 @@ const AbsensiTable = () => {
   );
 };
 
-export default AbsensiTable;
+export default LemburTable;

@@ -36,14 +36,14 @@ export const pegawaiColumns: ColumnDef<Pegawai>[] = [
     cell: ({ row }) => <span>{row.original.nama}</span>,
   },
   {
-    accessorKey: "jabatan",
+    accessorKey: "jabatan.nama",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Jabatan" />
     ),
     cell: ({ row }) => <span>{row.original.jabatan.nama}</span>,
   },
   {
-    accessorKey: "user",
+    accessorKey: "user.username",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Username" />
     ),

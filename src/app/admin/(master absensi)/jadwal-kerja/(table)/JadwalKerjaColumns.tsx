@@ -15,35 +15,49 @@ export const jadwalKerjaColumns: ColumnDef<JadwalKerja>[] = [
     accessorFn: (row, index) => index + 1,
   },
   {
-    accessorKey: "pegawai",
+    accessorKey: "pegawai.nama",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Pegawai" />
     ),
-    cell: ({ row }) => <span>{row.original.pegawai.nama}</span>,
+    cell: ({ row }) => <span>{`${row.original.pegawai.nama}`}</span>,
   },
   {
-    accessorKey: "shift_kerja",
+    id: "shift_kerja",
+    accessorFn: (row) => {
+      const waktuMasuk = row.shift_kerja?.waktu_masuk ?? "N/A";
+      const waktuPulang = row.shift_kerja?.waktu_pulang ?? "N/A";
+      return `${waktuMasuk} - ${waktuPulang}`;
+    },
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Shift" />
     ),
-    cell: ({ row }) => (
-      <span>
-        {row.original.shift_kerja.waktu_masuk} -{" "}
-        {row.original.shift_kerja.waktu_pulang}
-      </span>
-    ),
+    cell: ({ row }) => {
+      const shiftKerja = row.original.shift_kerja;
+      const waktuMasuk = shiftKerja?.waktu_masuk ?? "N/A";
+      const waktuPulang = shiftKerja?.waktu_pulang ?? "N/A";
+      return (
+        <span>
+          {waktuMasuk} - {waktuPulang}
+        </span>
+      );
+    },
   },
   {
-    accessorKey: "tanggal",
+    id: "tanggal",
+    accessorFn: (row) => {
+      const formattedDate = new Intl.DateTimeFormat("id-ID", {
+        dateStyle: "medium",
+      }).format(new Date(row.tanggal));
+      return formattedDate;
+    },
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Tanggal" />
     ),
     cell: ({ row }) => {
-      const tanggal = new Intl.DateTimeFormat("id-ID", {
+      const formattedDate = new Intl.DateTimeFormat("id-ID", {
         dateStyle: "full",
-      }).format(new Date(row.getValue("tanggal")));
-
-      return <span>{tanggal}</span>;
+      }).format(new Date(row.original.tanggal));
+      return <span>{formattedDate}</span>;
     },
   },
   {

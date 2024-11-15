@@ -8,45 +8,44 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
+  // DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import { JadwalKerja } from "@/store/jadwalKerja/jadwalKerja.types";
-import { useJadwalKerjaStore } from "@/store/jadwalKerja/jadwalKerjaStore";
+import { useLemburStore } from "@/store/lembur/lemburStore";
+import { Lembur } from "@/store/lembur/lembur.types";
 
-interface DataTableRowActionsProps<JadwalKerja> {
-  row: Row<JadwalKerja>;
+interface DataTableRowActionsProps<Lembur> {
+  row: Row<Lembur>;
 }
 
-export function JadwalKerjaActions({
-  row,
-}: DataTableRowActionsProps<JadwalKerja>) {
+export function LemburActions({ row }: DataTableRowActionsProps<Lembur>) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const setIsModalDeleteOpen = useJadwalKerjaStore(
-    (state) => state.setIsModalDeleteOpen,
-  );
-  const setIsModalEditOpen = useJadwalKerjaStore(
+  // const setIsModalDeleteOpen = useAbsensiStore(
+  //   (state) => state.setIsModalDeleteOpen,
+  // );
+  const setIsModalEditOpen = useLemburStore(
     (state) => state.setIsModalEditOpen,
   );
-
-  const setJadwalKerjaData = useJadwalKerjaStore(
-    (state) => state.setJadwalKerjaData,
+  const setLemburData = useLemburStore((state) => state.setLemburData);
+  const setIsModalDetailOpen = useLemburStore(
+    (state) => state.setIsModalDetailOpen,
   );
+  // const handleDelete = (row: Absensi) => {
+  //   setIsModalDeleteOpen(true);
+  //   setData(row);
+  // };
 
-  const setData = (row: JadwalKerja) => {
-    setJadwalKerjaData(row);
-  };
-
-  const handleDelete = (row: JadwalKerja) => {
-    setIsModalDeleteOpen(true);
-    setData(row);
-  };
-  const handleEdit = (row: JadwalKerja) => {
-    setJadwalKerjaData(row);
+  const handleEdit = (row: Lembur) => {
+    setLemburData(row);
     setIsModalEditOpen(true);
   };
+  const handleDetail = (row: Lembur) => {
+    setLemburData(row);
+    setIsModalDetailOpen(true);
+  };
+
   return (
     <DropdownMenu onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
@@ -62,15 +61,17 @@ export function JadwalKerjaActions({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[160px]">
         <DropdownMenuItem onClick={() => handleEdit(row.original)}>
-          Edit
+          Edit Status
         </DropdownMenuItem>
-        <DropdownMenuItem>Detail</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleDetail(row.original)}>
+          Detail
+        </DropdownMenuItem>
 
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => handleDelete(row.original)}>
+        {/* <DropdownMenuItem onClick={() => handleDelete(row.original)}>
           Delete
           <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   );

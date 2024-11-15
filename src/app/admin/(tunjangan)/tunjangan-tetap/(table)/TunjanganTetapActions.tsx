@@ -12,41 +12,44 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import { JadwalKerja } from "@/store/jadwalKerja/jadwalKerja.types";
-import { useJadwalKerjaStore } from "@/store/jadwalKerja/jadwalKerjaStore";
+import { TunjanganTetap } from "@/store/tunjanganTetap/tunjanganTetap.types";
+import { useTunjanganTetapStore } from "@/store/tunjanganTetap/tunjanganTetapStore";
 
-interface DataTableRowActionsProps<JadwalKerja> {
-  row: Row<JadwalKerja>;
+interface DataTableRowActionsProps<TunjanganTetap> {
+  row: Row<TunjanganTetap>;
 }
 
-export function JadwalKerjaActions({
+export function TunjanganTetapActions({
   row,
-}: DataTableRowActionsProps<JadwalKerja>) {
+}: DataTableRowActionsProps<TunjanganTetap>) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const setIsModalDeleteOpen = useJadwalKerjaStore(
+  const setIsModalDeleteOpen = useTunjanganTetapStore(
     (state) => state.setIsModalDeleteOpen,
   );
-  const setIsModalEditOpen = useJadwalKerjaStore(
+  const setIsModalEditOpen = useTunjanganTetapStore(
     (state) => state.setIsModalEditOpen,
   );
-
-  const setJadwalKerjaData = useJadwalKerjaStore(
-    (state) => state.setJadwalKerjaData,
+  const setTunjanganTetap = useTunjanganTetapStore(
+    (state) => state.setTunjanganTetap,
   );
-
-  const setData = (row: JadwalKerja) => {
-    setJadwalKerjaData(row);
-  };
-
-  const handleDelete = (row: JadwalKerja) => {
+  // const setIsModalDetailOpen = useTHRStore(
+  //   (state) => state.setIsModalDetailOpen,
+  // );
+  const handleDelete = (row: TunjanganTetap) => {
+    setTunjanganTetap(row);
     setIsModalDeleteOpen(true);
-    setData(row);
   };
-  const handleEdit = (row: JadwalKerja) => {
-    setJadwalKerjaData(row);
+
+  const handleEdit = (row: TunjanganTetap) => {
+    setTunjanganTetap(row);
     setIsModalEditOpen(true);
   };
+  // const handleDetail = (row: THR) => {
+  //   setTunjanganTetap(row);
+  //   setIsModalDetailOpen(true);
+  // };
+
   return (
     <DropdownMenu onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>

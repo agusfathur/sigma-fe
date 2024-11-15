@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
 import axiosJWT from "@/lib/authJWT";
 import { JenisIzin, JenisIzinCreate } from "./jenisIzin.types";

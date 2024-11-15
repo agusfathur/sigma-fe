@@ -1,18 +1,64 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { DataTable } from "@/components/table/data-table";
 import { useEffect, useState } from "react";
+import Select from "react-select";
 import Modal from "@/components/custom/modal";
-import { useAbsensiStore } from "@/store/absensi/absensiStore";
-import { absensiColumns } from "./AbsensiColumns";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useJamKerjaStore } from "@/store/jamKerja/jamKerjaStore";
+import {} from "@/store/absensi/absensiStore";
 import { Button } from "@/components/custom/button";
-import AbsensiPegawaiTable from "../(table pegawai)/AbsensiPegawaiTable";
+import { permohonanIzinColumns } from "./PermohonanIzinColumns";
+// import Image from "next/image";
+import { usePermohonanIzinStore } from "@/store/permohonanIzin/permohonanIzinStore";
+import Image from "next/image";
 
-const AbsensiTable = () => {
-  const [query, setQuery] = useState("");
+const PermohonanIzinTable = () => {
+  const permpohonanIzins = usePermohonanIzinStore(
+    (state) => state.permohonanIzin,
+  );
+
+  const fetchPermohonanIzinByFilter = usePermohonanIzinStore(
+    (state) => state.fetchPermohonanIzinByFilter,
+  );
+
+  const isModalFilterOpen = usePermohonanIzinStore(
+    (state) => state.isModalFilterOpen,
+  );
+  const setIsModalFilterOpen = usePermohonanIzinStore(
+    (state) => state.setIsModalFilterOpen,
+  );
+
+  const isModalEditOpen = usePermohonanIzinStore(
+    (state) => state.isModalEditOpen,
+  );
+  const setIsModalEditOpen = usePermohonanIzinStore(
+    (state) => state.setIsModalEditOpen,
+  );
+
+  const isModalDetailOpen = usePermohonanIzinStore(
+    (state) => state.isModalDetailOpen,
+  );
+  const setIsModalDetailOpen = usePermohonanIzinStore(
+    (state) => state.setIsModalDetailOpen,
+  );
+  const permohonanIzinData = usePermohonanIzinStore(
+    (state) => state.permohonanIzinData,
+  );
+
+  const updateStatusPermohonanIzin = usePermohonanIzinStore(
+    (state) => state.updateStatusPermohonanIzin,
+  );
+
+  const [statusIzin, setStatusIzin] = useState<string>(
+    permohonanIzinData?.status || "",
+  );
+  const statusOptions = [
+    { value: "pending", label: "pending" },
+    { value: "diterima", label: "diterima" },
+    { value: "ditolak", label: "ditolak" },
+    { value: "proses", label: "proses" },
+  ];
+
   const [tahunOptions, setTahunOptions] = useState<
     { value: string; label: string }[]
   >([]);
@@ -23,31 +69,6 @@ const AbsensiTable = () => {
   const [filterTahun, setFilterTahun] = useState("");
   const [filterBulan, setFilterBulan] = useState("");
   const [filterTanggal, setFilterTanggal] = useState("");
-  const [textFilter, setTextFilter] = useState("Hari Ini");
-
-  const absensis = useAbsensiStore((state) => state.absensi);
-
-  const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
-
-  const absensiData = useAbsensiStore((state) => state.absensiData);
-
-  const isModalKoordinatOpen = useAbsensiStore(
-    (state) => state.isModalKoordinatOpen,
-  );
-  const setIsModalKoordinatOpen = useAbsensiStore(
-    (state) => state.setIsModalKoordinatOpen,
-  );
-
-  const fetchJamKerja = useJamKerjaStore((state) => state.fetchJamKerja);
-
-  const fetchAbsensiByFilter = useAbsensiStore(
-    (state) => state.fetchAllAbsensiByFilter,
-  );
-
-  const isModalFilterOpen = useAbsensiStore((state) => state.isModalFilterOpen);
-  const setIsModalFilterOpen = useAbsensiStore(
-    (state) => state.setIsModalFilterOpen,
-  );
 
   const getTahunOption = () => {
     const tahun = new Date().getFullYear(); // Mendapatkan tahun saat ini
@@ -114,6 +135,33 @@ const AbsensiTable = () => {
 
     setBulanOptions(options);
   };
+
+  const getMonthName = (monthNumber: number) => {
+    const months = [
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ];
+
+    return months[monthNumber - 1]; // monthNumber dimulai dari 1, jadi kurangi 1 untuk akses array
+  };
+
+  const date = new Date();
+  const [query, setQuery] = useState(
+    `bulan=${date.getMonth() + 1}&tahun=${date.getFullYear()}`,
+  );
+  const [textFilter, setTextFilter] = useState(`
+    ${getMonthName(date.getMonth() + 1)} ${date.getFullYear()}`);
+
   const buildDateFilter = (
     filterTanggal: string,
     filterBulan: string,
@@ -121,24 +169,7 @@ const AbsensiTable = () => {
   ) => {
     const today = new Date();
     const currentYear = today.getFullYear();
-    const getMonthName = (monthNumber: number) => {
-      const months = [
-        "Januari",
-        "Februari",
-        "Maret",
-        "April",
-        "Mei",
-        "Juni",
-        "Juli",
-        "Agustus",
-        "September",
-        "Oktober",
-        "November",
-        "Desember",
-      ];
 
-      return months[monthNumber - 1]; // monthNumber dimulai dari 1, jadi kurangi 1 untuk akses array
-    };
     if (filterTanggal) {
       setTextFilter(`Tanggal ${filterTanggal}`);
       return `tanggal=${filterTanggal}`;
@@ -154,56 +185,87 @@ const AbsensiTable = () => {
 
   const handleFilter = async () => {
     const filter = buildDateFilter(filterTanggal, filterBulan, filterTahun);
-    await fetchAbsensiByFilter(filter);
+    setQuery(filter);
+    await fetchPermohonanIzinByFilter(query);
+  };
+
+  const handleUpdate = async () => {
+    try {
+      await updateStatusPermohonanIzin(
+        statusIzin as string,
+        permohonanIzinData?.id_permohonan_izin as string,
+      );
+      await fetchPermohonanIzinByFilter(query);
+      setIsModalEditOpen(false);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
-    fetchJamKerja();
     getTahunOption();
     getBulanOption();
-    const date = new Date();
-
-    // Menyesuaikan waktu agar sesuai dengan GMT+7
-    date.setHours(date.getHours() + 7);
-
-    const thisDay = "tanggal=" + date.toISOString().split("T")[0];
-    fetchAbsensiByFilter(query !== "" ? query : thisDay);
-  }, [fetchAbsensiByFilter, fetchJamKerja, query]);
+    fetchPermohonanIzinByFilter(query);
+    setStatusIzin(permohonanIzinData?.status as string);
+  }, [fetchPermohonanIzinByFilter, query, permohonanIzinData]);
 
   return (
     <>
-      <Tabs orientation="vertical" defaultValue="table" className="space-y-4">
-        <div className="w-full overflow-x-auto pb-2">
-          <TabsList>
-            <TabsTrigger value="table">Table</TabsTrigger>
-            <TabsTrigger value="pegawai">Pegawai</TabsTrigger>
-          </TabsList>
-        </div>
-        <TabsContent value="table" className="space-y-4">
-          <>
-            <h3>
-              Filter : <span>{textFilter}</span>
-            </h3>
-            <DataTable
-              data={absensis}
-              columns={absensiColumns}
-              onFilterChange={() => setIsModalFilterOpen(true)}
-              // onClickTambah={() => setIsModalCreateOpen(true)}
-            />
-          </>
-        </TabsContent>
-        <TabsContent value="pegawai">
-          <AbsensiPegawaiTable />
-        </TabsContent>
-      </Tabs>
+      <div className="space-y-4">
+        <h3>
+          Filter : <span>{textFilter}</span>
+        </h3>
+        <DataTable
+          data={permpohonanIzins}
+          columns={permohonanIzinColumns}
+          onFilterChange={() => setIsModalFilterOpen(true)}
+          // onClickTambah={() => setIsModalCreateOpen(true)}
+        />
+      </div>
+
       {/* modal div */}
       <>
+        {/* update status */}
         <Modal
-          isOpen={isModalCreateOpen}
-          textHeader="Create Pegawai"
-          onClose={() => setIsModalCreateOpen(false)}
+          isOpen={isModalEditOpen}
+          textHeader="Update Status Permohonan Izin"
+          heightScreenSize="lg"
+          onClose={() => setIsModalEditOpen(false)}
         >
-          <p>s</p>
+          <Select
+            options={statusOptions}
+            className="w-full rounded-md dark:text-black"
+            classNamePrefix="react-select"
+            placeholder="Select status lembur"
+            theme={(theme) => ({
+              ...theme,
+              colors: {
+                ...theme.colors,
+                primary: "black", // Warna border saat di-focus
+                primary25: "#e5e7eb", // Warna abu-abu terang saat di-hover
+                primary50: "#d1d5db", // Warna abu-abu saat di-click
+                neutral20: "black", // Border default
+                neutral80: "black",
+              },
+            })}
+            onChange={(selectedOption) =>
+              setStatusIzin(selectedOption ? String(selectedOption.value) : "")
+            }
+            defaultValue={
+              statusOptions.find(
+                (option: any) =>
+                  String(option.value) === String(permohonanIzinData?.status),
+              ) || null
+            }
+            value={
+              statusOptions.find(
+                (option: any) => String(option.value) === String(statusIzin),
+              ) || null
+            }
+          />
+          <Button onClick={handleUpdate} className="mt-48 w-full">
+            Update
+          </Button>
         </Modal>
 
         {/* filter */}
@@ -264,56 +326,31 @@ const AbsensiTable = () => {
           </div>
         </Modal>
 
-        {/* detail koordinat */}
+        {/* detail */}
         <Modal
-          isOpen={isModalKoordinatOpen}
-          textHeader="Koordinat Absen"
+          isOpen={isModalDetailOpen}
+          textHeader="Bukti Permohonan Izin"
+          heightScreenSize="2xl"
           widthScreenSize="2xl"
-          onClose={() => setIsModalKoordinatOpen(false)}
+          onClose={() => setIsModalDetailOpen(false)}
         >
-          <div className="flex justify-between space-x-2">
-            <div>
-              <h2 className="mb-2">Koordinat Masuk</h2>
-              {absensiData?.koordinat_masuk ? (
-                <iframe
-                  id="googleMap"
-                  src={`https://maps.google.com/maps?q=${absensiData?.koordinat_masuk?.split(",")[0]},${absensiData?.koordinat_masuk?.split(",")[1]}&z=15&output=embed&layer=t`}
-                  className="h-72 w-[300px] rounded-md md:w-[300px]"
-                  style={{ border: 0 }}
-                  allowFullScreen={true}
-                  referrerPolicy="no-referrer-when-downgrade"
-                ></iframe>
-              ) : (
-                <div className="flex h-72 w-[300px] items-center justify-center rounded-md bg-gray-200 md:w-[300px]">
-                  <p className="text-center text-sm font-semibold text-gray-600">
-                    Tidak Ada Koordinat
-                    <br />
-                    atau belum absen
-                  </p>
-                </div>
-              )}
-            </div>
-            <div>
-              <h2 className="mb-2">Koordinat Pulang</h2>
-              {absensiData?.koordinat_pulang ? (
-                <iframe
-                  id="googleMap"
-                  src={`https://maps.google.com/maps?q=${absensiData?.koordinat_pulang?.split(",")[0]},${absensiData?.koordinat_pulang?.split(",")[1]}&z=15&output=embed&layer=t`}
-                  className="h-72 w-[300px] rounded-md md:w-[300px]"
-                  style={{ border: 0 }}
-                  allowFullScreen={true}
-                  referrerPolicy="no-referrer-when-downgrade"
-                ></iframe>
-              ) : (
-                <div className="flex h-72 w-[300px] items-center justify-center rounded-md bg-gray-200 md:w-[300px]">
-                  <p className="text-center text-sm font-semibold text-gray-600">
-                    Tidak Ada Koordinat
-                    <br />
-                    atau belum pulang
-                  </p>
-                </div>
-              )}
-            </div>
+          <div>
+            {permohonanIzinData?.format_bukti === "image" ? (
+              <Image
+                src={permohonanIzinData?.bukti ?? ""}
+                alt="bukti"
+                width={500}
+                height={500}
+                className="w-full rounded-md"
+              />
+            ) : (
+              <iframe
+                src={permohonanIzinData?.bukti ?? ""}
+                width="100%"
+                height="500px"
+                className="w-full rounded-md"
+              ></iframe>
+            )}
           </div>
         </Modal>
       </>
@@ -321,4 +358,4 @@ const AbsensiTable = () => {
   );
 };
 
-export default AbsensiTable;
+export default PermohonanIzinTable;

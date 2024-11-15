@@ -67,7 +67,7 @@ const PegawaiActions = ({ row }: any) => {
 
   return (
     <Link
-      href={`/admin/absensi/pegawai/${row.original.id_pegawai}`}
+      href={`/admin/tunjangan-tetap/pegawai/${row.original.id_pegawai}`}
       onClick={() => setPegawaiData(row.original)}
     >
       <Button className="h-8 w-8 p-0">
