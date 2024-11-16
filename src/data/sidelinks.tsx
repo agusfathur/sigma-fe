@@ -20,6 +20,10 @@ import {
   IconUserDollar,
   IconMoodDollar,
   IconMapPinDollar,
+  IconReceiptDollar,
+  IconSquareRoundedPercentage,
+  IconCashBanknote,
+  IconCut,
 } from "@tabler/icons-react";
 
 export interface NavLink {
@@ -174,12 +178,32 @@ export const sidelinks: SideLink[] = [
       },
     ],
   },
-  // {
-  //   title: "Category",
-  //   label: "",
-  //   href: "/category",
-  //   icon: <IconBoxSeam size={18} />,
-  // },
+  {
+    title: "Penggajian",
+    label: "",
+    href: "",
+    icon: <IconReceiptDollar size={18} />,
+    sub: [
+      {
+        title: "Pajak",
+        label: "",
+        href: "/admin/pajak",
+        icon: <IconSquareRoundedPercentage size={18} />,
+      },
+      {
+        title: "Pinjaman",
+        label: "",
+        href: "/admin/pinjaman",
+        icon: <IconCashBanknote size={18} />,
+      },
+      {
+        title: "Potong Gaji",
+        label: "",
+        href: "/admin/potong-gaji",
+        icon: <IconCut size={18} />,
+      },
+    ],
+  },
   // {
   //   title: "Product",
   //   label: "",

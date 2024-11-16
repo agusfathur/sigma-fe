@@ -11,7 +11,7 @@ import { useTunjanganBonusStore } from "@/store/tunjanganBonus/tunjanganBonusSto
 import { TunjanganBonusColumns } from "./TunjanganBonusColumns";
 import TunjanganTetapCreateForm from "../(form)/TunjanganBonusCreateForm";
 
-const THRTable = () => {
+const TunjanganBonusTable = () => {
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
 
   const tunjanganBonuss = useTunjanganBonusStore(
@@ -209,4 +209,4 @@ const THRTable = () => {
   );
 };
 
-export default THRTable;
+export default TunjanganBonusTable;
