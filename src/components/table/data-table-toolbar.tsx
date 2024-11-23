@@ -7,12 +7,14 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   onClickTambah?: () => void;
   onFilterChange?: () => void;
+  onSettingChange?: () => void;
 }
 
 export function DataTableToolbar<TData>({
   table,
   onClickTambah,
   onFilterChange,
+  onSettingChange,
 }: DataTableToolbarProps<TData>) {
   return (
     <div className="flex items-center justify-between">
@@ -43,6 +45,16 @@ export function DataTableToolbar<TData>({
               onClick={() => onFilterChange && onFilterChange()}
             >
               Filter
+            </Button>
+          )}
+          {onSettingChange && (
+            <Button
+              variant="default"
+              size="sm"
+              className="ml-auto h-8 justify-end px-2 text-sm lg:px-3"
+              onClick={() => onSettingChange()}
+            >
+              Setting
             </Button>
           )}
           {onClickTambah && (

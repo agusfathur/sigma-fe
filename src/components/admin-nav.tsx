@@ -16,7 +16,7 @@ import axiosJWT from "@/lib/authJWT";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-export function UserNav() {
+export function AdminNav() {
   const { data: session }: { data: any } = useSession();
   const router = useRouter();
   const handleSignOut = async () => {
@@ -59,7 +59,7 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => router.push("/user/profile")}>
+          <DropdownMenuItem onClick={() => router.push("/admin/profile")}>
             Profile
             <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
           </DropdownMenuItem>

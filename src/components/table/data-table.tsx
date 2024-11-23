@@ -32,6 +32,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   onClickTambah?: () => void;
   onFilterChange?: () => void;
+  onSettingChange?: () => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -39,6 +40,7 @@ export function DataTable<TData, TValue>({
   data,
   onClickTambah,
   onFilterChange,
+  onSettingChange,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -75,6 +77,7 @@ export function DataTable<TData, TValue>({
       <DataTableToolbar
         onClickTambah={onClickTambah}
         onFilterChange={onFilterChange}
+        onSettingChange={onSettingChange}
         table={table}
       />
       <div className="rounded-md border">

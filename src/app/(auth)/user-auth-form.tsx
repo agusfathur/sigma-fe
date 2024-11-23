@@ -42,7 +42,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       });
       if (res?.error) {
         setIsLoading(false);
-        setError("Error logging in");
+        setError("Invalid username or password");
       }
       if (!res?.error) {
         router.push(callbackUrl);
@@ -57,7 +57,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>
-      {error && <p>{error}</p>}
+      {error && <p className="text-red-500">{error}</p>}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="grid gap-2">

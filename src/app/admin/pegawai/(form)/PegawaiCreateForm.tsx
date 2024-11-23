@@ -23,7 +23,6 @@ import { useJabatanFungsionalStore } from "@/store/jabatanFungsional/jabatanFung
 import { useStatusKepegawaianStore } from "@/store/statusKepegawaian/statusKepegawaianStore";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
-import { set } from "zod";
 
 interface PegawaiCreateFormProps {
   onSuccess: () => void;
