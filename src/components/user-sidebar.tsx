@@ -36,7 +36,7 @@ export default function UserSidebar({
   return (
     <aside
       className={cn(
-        `fixed left-0 right-0 top-0 z-50 w-full border-r-2 border-r-muted transition-[width] md:bottom-0 md:right-auto md:h-svh ${isCollapsed ? "md:w-14" : "md:w-64"}`,
+        `fixed left-0 right-0 top-0 z-50 w-full border-r-2 border-slate-300 shadow-lg shadow-white transition-[width] dark:shadow-lg md:bottom-0 md:right-auto md:h-svh md:shadow-2xl md:dark:shadow-white ${isCollapsed ? "md:w-14" : "md:w-64"}`,
         className,
       )}
     >
@@ -57,9 +57,9 @@ export default function UserSidebar({
               <Image
                 src={settingApp.logo_sistem as string}
                 alt="logo sistem"
-                width={32}
-                height={32}
-                className={`transition-all ${isCollapsed ? "h-6 w-9" : "h-10 w-9"}`}
+                width={40}
+                height={40}
+                className={`transition-all ${isCollapsed ? "h-6 w-9 rounded-sm" : "h-10 w-9 rounded-md"}`}
               />
             ) : (
               <svg

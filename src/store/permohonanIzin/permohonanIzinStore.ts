@@ -11,6 +11,11 @@ interface AbsensiState {
   permohonanIzin: PermohonanIzin[];
   fetchPermohonanIzin: () => Promise<void>;
   fetchPermohonanIzinByFilter: (fiter: string) => Promise<any>;
+  fetchPermohonanIzinByUser: (userId: string) => Promise<any>;
+  fetchPermohonanIzinByUserFilter: (
+    userId: string,
+    filter: string,
+  ) => Promise<any>;
   insertPermohonanIzin: (permohonanIzin: PermohonanIzinCreate) => Promise<any>;
   updateStatusPermohonanIzin: (
     lemburStatus: string,
@@ -57,12 +62,66 @@ export const usePermohonanIzinStore = create<AbsensiState>((set, get) => ({
       console.log(error);
     }
   },
+  fetchPermohonanIzinByUser: async (userId: string) => {
+    try {
+      const pegawai = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai/user/${userId}`,
+      );
 
+      const res = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/permohonan-izin/pegawai${pegawai.data.data.id_pegawai}`,
+      );
+
+      console.log(res.data);
+
+      set({ permohonanIzin: res.data.data });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  fetchPermohonanIzinByUserFilter: async (userId: string, filter: string) => {
+    try {
+      const pegawai = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai/user/${userId}`,
+      );
+
+      const pegawaiId = pegawai.data.data.id_pegawai;
+
+      const res = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/permohonan-izin/pegawai/${pegawaiId}?${filter}`,
+      );
+
+      set({ permohonanIzin: res.data.data });
+    } catch (error) {
+      console.log(error);
+    }
+  },
   insertPermohonanIzin: async (permohonanIzin: PermohonanIzinCreate) => {
+    const formData = new FormData();
+    formData.append("pegawai_id", permohonanIzin.pegawai_id);
+    formData.append("jenis_mohon_izin", permohonanIzin.jenis_mohon_izin);
+    formData.append("jenis_izin_id", permohonanIzin.jenis_izin_id);
+    formData.append("bukti", permohonanIzin.bukti);
+    formData.append(
+      "tanggal_dari",
+      permohonanIzin.tanggal_dari + "T00:00:00.000Z",
+    );
+    formData.append(
+      "tanggal_sampai",
+      permohonanIzin.tanggal_sampai + "T00:00:00.000Z",
+    );
+    formData.append("keterangan", permohonanIzin.keterangan);
+    formData.append("status", permohonanIzin.status);
     try {
       const create = await axiosJWT.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/permohonan-izin`,
-        permohonanIzin,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
       );
       return create.data;
     } catch (error) {

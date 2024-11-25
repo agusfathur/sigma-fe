@@ -4,7 +4,7 @@ import { Pegawai } from "../pegawai/pegawai.types";
 export type PermohonanIzin = {
   id_permohonan_izin: string;
   pegawai_id: string;
-  jenis_mohon_izin: "izin" | "cuti";
+  jenis_mohon_izin: string;
   jenis_izin_id: string;
   bukti: string;
   format_bukti: "pdf" | "image";
@@ -19,9 +19,9 @@ export type PermohonanIzin = {
 
 export type PermohonanIzinCreate = {
   pegawai_id: string;
-  jenis_mohon_izin: "izin" | "cuti";
+  jenis_mohon_izin: string;
   jenis_izin_id: string;
-  bukti: string;
+  bukti: File;
   tanggal_dari: string;
   tanggal_sampai: string;
   keterangan: string;
@@ -31,9 +31,9 @@ export type PermohonanIzinCreate = {
 export type PermohonanIzinUpdate = {
   id_permohonan_izin: string;
   pegawai_id: string;
-  jenis_mohon_izin: "izin" | "cuti";
+  jenis_mohon_izin: string;
   jenis_izin_id: string;
-  bukti: string;
+  bukti: File;
   tanggal_dari: string;
   tanggal_sampai: string;
   keterangan: string;

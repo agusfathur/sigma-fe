@@ -12,6 +12,10 @@ interface JadwalKerjaState {
     filter: string,
     pegawaiId: string,
   ) => Promise<any>;
+  fetchJadwalKerjaPegawaiByUserFilter: (
+    userId: string,
+    filter: string,
+  ) => Promise<any>;
   updateJadwalKerja: (jadwalKerja: JadwalKerja) => Promise<any>;
   deleteJadwalKerja: (id: string) => Promise<any>;
   jadwalKerjaById: (id: string) => JadwalKerja | undefined;
@@ -54,6 +58,24 @@ export const useJadwalKerjaStore = create<JadwalKerjaState>((set, get) => ({
     pegawaiId: string,
   ) => {
     try {
+      const res = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/jadwal-pegawai/pegawai/${pegawaiId}?${filter}`,
+      );
+
+      set({ jadwalKerja: res.data.data });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  fetchJadwalKerjaPegawaiByUserFilter: async (
+    userId: string,
+    filter: string,
+  ) => {
+    try {
+      const pegawai = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai/user/${userId}`,
+      );
+      const pegawaiId = pegawai.data.data.id_pegawai;
       const res = await axiosJWT.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/jadwal-pegawai/pegawai/${pegawaiId}?${filter}`,
       );

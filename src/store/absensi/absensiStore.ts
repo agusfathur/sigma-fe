@@ -15,6 +15,7 @@ interface AbsensiState {
     fiter: string,
     pegawaiId: string,
   ) => Promise<any>;
+  fetchAllAbsensiByUserFilter: (userId: string, filter: string) => Promise<any>;
   insertAbsensiMasuk: (absensiMasuk: CreateAbsensiMasuk) => Promise<any>;
   insertAbsensiPulang: (absensiPulang: CreateAbsensiPulang) => Promise<any>;
   updateAbsensi: (absensi: Absensi) => Promise<any>;
@@ -62,7 +63,22 @@ export const useAbsensiStore = create<AbsensiState>((set, get) => ({
         `${process.env.NEXT_PUBLIC_API_URL}/api/absensi/pegawai/${pegawaiId}?${filter}`,
       );
 
-      console.log(res.data);
+      set({ absensi: res.data.data });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  fetchAllAbsensiByUserFilter: async (userId: string, filter: string) => {
+    try {
+      const pegawai = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai/user/${userId}`,
+      );
+
+      const pegawaiId = pegawai.data.data.id_pegawai;
+
+      const res = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/absensi/pegawai/${pegawaiId}?${filter}`,
+      );
 
       set({ absensi: res.data.data });
     } catch (error) {

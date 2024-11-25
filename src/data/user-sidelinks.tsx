@@ -28,7 +28,7 @@ export const userSidelinks: SideLink[] = [
   {
     title: "Riwayat Absensi",
     label: "",
-    href: "/user/slip-gaji",
+    href: "/user/riwayat-absensi",
     icon: <IconFaceId size={18} />,
   },
   {
@@ -40,7 +40,7 @@ export const userSidelinks: SideLink[] = [
   {
     title: "Permohonan Izin / Cuti",
     label: "",
-    href: "/user/permohonan-izin",
+    href: "/user/izin",
     icon: <IconMessage2Share size={18} />,
   },
   {

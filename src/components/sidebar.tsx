@@ -6,6 +6,8 @@ import { Button } from "./custom/button";
 import Nav from "./nav";
 import { cn } from "@/lib/utils";
 import { sidelinks } from "@/data/sidelinks";
+import { useSettingAppStore } from "@/store/settingApp/settingAppStore";
+import Image from "next/image";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
   isCollapsed: boolean;
@@ -19,6 +21,9 @@ export default function Sidebar({
 }: SidebarProps) {
   const [navOpened, setNavOpened] = useState(false);
 
+  const settingApp = useSettingAppStore((state) => state.settingApp);
+  const fetchSettingApp = useSettingAppStore((state) => state.fetchSettingApp);
+
   /* Make body not scrollable when navBar is opened */
   useEffect(() => {
     if (navOpened) {
@@ -26,12 +31,13 @@ export default function Sidebar({
     } else {
       document.body.classList.remove("overflow-hidden");
     }
-  }, [navOpened]);
+    fetchSettingApp();
+  }, [navOpened, fetchSettingApp]);
 
   return (
     <aside
       className={cn(
-        `fixed left-0 right-0 top-0 z-50 w-full border-r-2 border-r-muted transition-[width] md:bottom-0 md:right-auto md:h-svh ${isCollapsed ? "md:w-14" : "md:w-64"}`,
+        `fixed left-0 right-0 top-0 z-50 w-full border-r-2 border-slate-300 shadow-2xl transition-[width] dark:shadow-lg dark:shadow-white md:bottom-0 md:right-auto md:h-svh ${isCollapsed ? "md:w-14" : "md:w-64"}`,
         className,
       )}
     >
@@ -48,36 +54,46 @@ export default function Sidebar({
           className="z-50 flex justify-between px-4 py-3 shadow-sm md:px-4"
         >
           <div className={`flex items-center ${!isCollapsed ? "gap-2" : ""}`}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 256 256"
-              className={`transition-all ${isCollapsed ? "h-6 w-6" : "h-8 w-8"}`}
-            >
-              <rect width="256" height="256" fill="none"></rect>
-              <line
-                x1="208"
-                y1="128"
-                x2="128"
-                y2="208"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="16"
-              ></line>
-              <line
-                x1="192"
-                y1="40"
-                x2="40"
-                y2="192"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="16"
-              ></line>
-              {/* <span className="sr-only">Website Name</span> */}
-            </svg>
+            {settingApp?.logo_sistem ? (
+              <Image
+                src={settingApp?.logo_sistem}
+                alt="logo sistem"
+                className={`transition-all ${isCollapsed ? "h-6 w-9 rounded-sm" : "h-10 w-9 rounded-md"}`}
+                width={40}
+                height={40}
+              />
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 256 256"
+                className={`transition-all ${isCollapsed ? "h-6 w-6" : "h-8 w-8"}`}
+              >
+                <rect width="256" height="256" fill="none"></rect>
+                <line
+                  x1="208"
+                  y1="128"
+                  x2="128"
+                  y2="208"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="16"
+                ></line>
+                <line
+                  x1="192"
+                  y1="40"
+                  x2="40"
+                  y2="192"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="16"
+                ></line>
+                {/* <span className="sr-only">Website Name</span> */}
+              </svg>
+            )}
             <div
               className={`flex flex-col justify-end truncate ${isCollapsed ? "invisible w-0" : "visible w-auto"}`}
             >

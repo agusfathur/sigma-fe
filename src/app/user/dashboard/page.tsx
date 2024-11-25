@@ -1,5 +1,17 @@
-const UserDashboardPage = () => {
-  return <div>UserDashboardPage</div>;
+import { Metadata } from "next";
+import UserDashboardPage from "./DashboardPage";
+
+export const metadata: Metadata = {
+  title: "User Dashboard",
+  description: "User Dashboard",
 };
 
-export default UserDashboardPage;
+const DashboardUser = () => {
+  return (
+    <>
+      <UserDashboardPage />
+    </>
+  );
+};
+
+export default DashboardUser;

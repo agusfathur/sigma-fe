@@ -14,8 +14,8 @@ export type Absensi = {
   status_absen: string;
   is_lembur: boolean;
   jadwal_id: string;
-  pegawai: Pegawai;
-  jadwal_pegawai: JadwalKerja;
+  pegawai: Pegawai | null;
+  jadwal_pegawai: JadwalKerja | null;
 };
 
 export type CreateAbsensiMasuk = {

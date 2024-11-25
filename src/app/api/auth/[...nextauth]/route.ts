@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { JWT } from "next-auth/jwt";
 import axios from "axios";
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth, { Account, NextAuthOptions, Session, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { cookies } from "next/headers";
+import { Profile } from "next-auth";
 
 // Ensure you have access to setAccessToken
 const authOptions: NextAuthOptions = {
@@ -50,7 +52,17 @@ const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }: any) {
+    async jwt({
+      token,
+      user,
+    }: {
+      token: JWT;
+      user?: User | null;
+      account?: Account | null;
+      profile?: Profile;
+      trigger?: "signIn" | "signUp" | "update";
+      isNewUser?: boolean;
+    }) {
       if (user) {
         token.id = user.id_user;
         token.name = user.name;
@@ -61,15 +73,15 @@ const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    async session({ session, token }: any) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       session.user = {
         ...session.user,
-        id: token.id || null,
-        name: token.name || null,
-        username: token.username || null,
-        image: token.image || null,
-        email: token.email || null,
-        role: token.role || null,
+        id: token.id as string,
+        name: token.name,
+        username: token.username,
+        image: token.image as string,
+        email: token.email,
+        role: token.role,
       };
       return session;
     },

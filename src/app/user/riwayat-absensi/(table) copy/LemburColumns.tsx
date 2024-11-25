@@ -1,0 +1,125 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ColumnDef } from "@tanstack/react-table";
+
+import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
+import { Lembur } from "@/store/lembur/lembur.types";
+import { useJamKerjaStore } from "@/store/jamKerja/jamKerjaStore";
+import { LemburActions } from "./LemburActions";
+
+export const lemburColumns: ColumnDef<Lembur>[] = [
+  {
+    id: "no",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="No" />
+    ),
+    cell: ({ row }) => <span>{row.index + 1}</span>,
+    accessorFn: (row, index) => index + 1,
+  },
+  {
+    accessorKey: "tanggal",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Tanggal" />
+    ),
+    cell: ({ row }) => {
+      const tanggalHari = new Intl.DateTimeFormat("id-ID", {
+        dateStyle: "full",
+      }).format(new Date(row.getValue("tanggal")));
+
+      const tanggal = new Intl.DateTimeFormat("id-ID", {
+        dateStyle: "medium",
+      }).format(new Date(row.getValue("tanggal")));
+
+      return (
+        <span>
+          {tanggalHari.split(",")[0]}, {tanggal}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "jadwal_id",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Jadwal Masuk | Pulang" />
+    ),
+    cell: ({ row }) => <JadwalCell row={row} />,
+  },
+  {
+    id: "waktu_masuk_pulang",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Waktu Masuk | Pulang" />
+    ),
+    cell: ({ row }) => (
+      <span>
+        {row.original.absensi.waktu_masuk ?? "-"} |{" "}
+        {row.original.absensi.waktu_pulang ?? "-"}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "total_jam",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Total Jam" />
+    ),
+    cell: ({ row }) => <span>{row.original.total_jam}</span>,
+  },
+  {
+    accessorKey: "total_upah",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Total Upah" />
+    ),
+    cell: ({ row }) => {
+      const upah = new Intl.NumberFormat("id-Id").format(
+        row.original.total_upah,
+      );
+      return <span>Rp. {upah}</span>;
+    },
+  },
+  {
+    accessorKey: "status_lembur",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
+    cell: ({ row }) => {
+      let color: string;
+      switch (row.original.status_lembur) {
+        case "pending":
+          color = "bg-blue-200 text-blue-900";
+          break;
+        case "diterima":
+          color = "bg-green-200 text-green-900";
+          break;
+        case "ditolak":
+          color = "bg-red-200 text-red-900";
+          break;
+        default:
+          color = "bg-gray-200 text-gray-900";
+          break;
+      }
+      return (
+        <span
+          className={`rounded-2xl px-3 py-1 text-center text-xs font-bold ${color} capitalize`}
+        >
+          {row.original.status_lembur}
+        </span>
+      );
+    },
+  },
+  {
+    id: "actions",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Action" />
+    ),
+    cell: ({ row }) => <LemburActions row={row} />,
+  },
+];
+
+const JadwalCell = ({ row }: any) => {
+  const getJamKerja = useJamKerjaStore((state) => state.jamKerjaById);
+
+  const jamKerja = getJamKerja(row.original.absensi.jadwal_pegawai.shift_id);
+  return (
+    <span>
+      {jamKerja?.waktu_masuk ?? "-"} | {jamKerja?.waktu_pulang ?? "-"}
+    </span>
+  );
+};

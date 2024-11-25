@@ -7,6 +7,7 @@ interface AbsensiState {
   lembur: Lembur[];
   fetchLembur: () => Promise<void>;
   fetchAllLemburByFilter: (fiter: string) => Promise<any>;
+  fetchAllLemburByUserFilter: (userId: string, fiter: string) => Promise<any>;
   insertLembur: (lembur: LemburCreate) => Promise<any>;
   updateStatusLembur: (lemburStatus: string, id: string) => Promise<any>;
   updateLembur: (Lembur: LemburUpdate) => Promise<any>;
@@ -41,6 +42,21 @@ export const useLemburStore = create<AbsensiState>((set, get) => ({
     try {
       const res = await axiosJWT.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/lembur?${filter}`,
+      );
+
+      set({ lembur: res.data.data });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  fetchAllLemburByUserFilter: async (userId: string, filter: string) => {
+    const pegawai = await axiosJWT.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai/user/${userId}`,
+    );
+
+    try {
+      const res = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/lembur/pegawai/${pegawai.data.data.id_pegawai}?${filter}`,
       );
 
       set({ lembur: res.data.data });
