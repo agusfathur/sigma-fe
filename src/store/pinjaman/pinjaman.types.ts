@@ -11,12 +11,12 @@ export type Pinjaman = {
   pegawai: Pegawai;
 };
 export type PinjamanCreate = {
-  pegawai_id: string;
+  // pegawai_id: string;
   nominal: number;
   tanggal: string;
   tahun: number;
   keterangan: string;
-  status_pinjaman: string;
+  // status_pinjaman: string;
 };
 export type PinjamanUpdate = {
   id_pinjaman: string;

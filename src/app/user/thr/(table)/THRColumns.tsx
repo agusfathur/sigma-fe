@@ -2,7 +2,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
-import { THRActions } from "./THRActions";
 import { THR } from "@/store/THR/THR.types";
 
 export const THRColumns: ColumnDef<THR>[] = [
@@ -13,13 +12,6 @@ export const THRColumns: ColumnDef<THR>[] = [
     ),
     cell: ({ row }) => <span>{row.index + 1}</span>,
     accessorFn: (row, index) => index + 1,
-  },
-  {
-    accessorKey: "pegawai.nama",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Pegawai" />
-    ),
-    cell: ({ row }) => <span>{row.original.pegawai.nama}</span>,
   },
   {
     accessorKey: "nominal",
@@ -34,33 +26,21 @@ export const THRColumns: ColumnDef<THR>[] = [
   {
     id: "tanggal_pembayaran",
     accessorFn: (row) => {
-      const tanggalHari = new Intl.DateTimeFormat("id-ID", {
-        dateStyle: "full",
-      }).format(new Date(row.tanggal_pembayaran));
-
       const tanggal = new Intl.DateTimeFormat("id-ID", {
-        dateStyle: "medium",
+        dateStyle: "long",
       }).format(new Date(row.tanggal_pembayaran));
 
-      return `${tanggalHari.split(",")[0]}, ${tanggal}`;
+      return `${tanggal}`;
     },
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Tanggal Pembayaran" />
     ),
     cell: ({ row }) => {
-      const tanggalHari = new Intl.DateTimeFormat("id-ID", {
-        dateStyle: "full",
-      }).format(new Date(row.getValue("tanggal_pembayaran")));
-
       const tanggal = new Intl.DateTimeFormat("id-ID", {
-        dateStyle: "medium",
+        dateStyle: "long",
       }).format(new Date(row.getValue("tanggal_pembayaran")));
 
-      return (
-        <span>
-          {tanggalHari.split(",")[0]}, {tanggal}
-        </span>
-      );
+      return <span>{tanggal}</span>;
     },
   },
   {
@@ -93,12 +73,5 @@ export const THRColumns: ColumnDef<THR>[] = [
           return <span>Unknown</span>;
       }
     },
-  },
-  {
-    id: "actions",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Action" />
-    ),
-    cell: ({ row }) => <THRActions row={row} />,
   },
 ];

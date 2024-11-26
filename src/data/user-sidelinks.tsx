@@ -1,10 +1,11 @@
 import {
   IconLayoutDashboard,
   IconCashRegister,
-  IconReport,
-  IconMessage2Share,
   IconFaceId,
   IconUserCog,
+  IconMoonStars,
+  IconReportMoney,
+  IconCalendarDot,
 } from "@tabler/icons-react";
 
 export interface NavLink {
@@ -41,13 +42,19 @@ export const userSidelinks: SideLink[] = [
     title: "Permohonan Izin / Cuti",
     label: "",
     href: "/user/izin",
-    icon: <IconMessage2Share size={18} />,
+    icon: <IconCalendarDot size={18} />,
   },
   {
-    title: "Laporan",
+    title: "Pinjaman",
     label: "",
-    href: "/user/laporan",
-    icon: <IconReport size={18} />,
+    href: "/user/pinjaman",
+    icon: <IconReportMoney size={18} />,
+  },
+  {
+    title: "THR",
+    label: "",
+    href: "/user/thr",
+    icon: <IconMoonStars size={18} />,
   },
   {
     title: "Profile",

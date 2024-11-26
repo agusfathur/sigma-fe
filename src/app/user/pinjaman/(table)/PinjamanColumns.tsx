@@ -15,13 +15,6 @@ export const PinjamanColumns: ColumnDef<Pinjaman>[] = [
     accessorFn: (row, index) => index + 1,
   },
   {
-    accessorKey: "pegawai.nama",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Pegawai" />
-    ),
-    cell: ({ row }) => <span>{row.original.pegawai.nama}</span>,
-  },
-  {
     accessorKey: "nominal",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Nominal" />

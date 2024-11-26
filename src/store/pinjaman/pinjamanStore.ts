@@ -7,7 +7,8 @@ interface PinjamanState {
   pinjaman: Pinjaman[];
   fetchPinjaman: () => Promise<void>;
   fetchPinjamanByFilter: (filter: string) => Promise<void>;
-  insertPinjaman: (pinjaman: PinjamanCreate) => Promise<any>;
+  fetchPinjamanByUserFilter: (userId: string, filter: string) => Promise<void>;
+  insertPinjaman: (userId: string, pinjaman: PinjamanCreate) => Promise<any>;
   updatePinjaman: (pinjaman: PinjamanUpdate) => Promise<any>;
   updateStatusPinjaman: (id: string, status: string) => Promise<any>;
   deletePinjaman: (id: string) => Promise<any>;
@@ -48,11 +49,34 @@ export const usePinjamanStore = create<PinjamanState>((set, get) => ({
       console.log(error);
     }
   },
-  insertPinjaman: async (pinjaman: PinjamanCreate) => {
+  fetchPinjamanByUserFilter: async (userId: string, filter: string) => {
     try {
+      const pegawai = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai/user/${userId}`,
+      );
+
+      const res = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/pinjaman/pegawai/${pegawai.data.data.id_pegawai}?${filter}`,
+      );
+
+      set({ pinjaman: res.data.data });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  insertPinjaman: async (userId: string, pinjaman: PinjamanCreate) => {
+    try {
+      const pegawai = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai/user/${userId}`,
+      );
+
       const create = await axiosJWT.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/pinjaman`,
-        pinjaman,
+        {
+          ...pinjaman,
+          pegawai_id: pegawai.data.data.id_pegawai,
+          status_pinjaman: "pending",
+        },
       );
       return create.data;
     } catch (error) {

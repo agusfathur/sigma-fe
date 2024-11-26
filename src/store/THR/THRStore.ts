@@ -7,6 +7,7 @@ interface AbsensiState {
   tunjanganHariRaya: THR[];
   fetchTHR: () => Promise<void>;
   fetchTHRByFilter: (fiter: string) => Promise<any>;
+  fetchTHRByUser: (userId: string) => Promise<any>;
   insertTHR: (tunjanganHariRaya: THRCreate) => Promise<any>;
   updateTHR: (tunjanganHariRaya: THRUpdate) => Promise<any>;
   deleteTHR: (id: string) => Promise<any>;
@@ -47,7 +48,20 @@ export const useTHRStore = create<AbsensiState>((set, get) => ({
       console.log(error);
     }
   },
+  fetchTHRByUser: async (userId: string) => {
+    try {
+      const pegawai = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai/user/${userId}`,
+      );
+      const res = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/thr/pegawai/${pegawai.data.data.id_pegawai}`,
+      );
 
+      set({ tunjanganHariRaya: res.data.data });
+    } catch (error) {
+      console.log(error);
+    }
+  },
   insertTHR: async (thr: THRCreate) => {
     try {
       const create = await axiosJWT.post(
