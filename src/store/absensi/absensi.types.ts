@@ -19,18 +19,13 @@ export type Absensi = {
 };
 
 export type CreateAbsensiMasuk = {
-  pegawai_id: string;
-  waktu_pulang: string;
-  koordinat_pulang: string;
-  foto_pulang: string;
-  is_lembur: boolean;
-  jadwal_id: string;
-};
-export type CreateAbsensiPulang = {
-  pegawai_id: string;
-  waktu_masuk: string;
+  user_id: string;
   koordinat_masuk: string;
-  foto_masuk: string;
-  is_lembur: boolean;
-  jadwal_id: string;
+  foto_masuk: File;
+};
+
+export type CreateAbsensiPulang = {
+  user_id: string;
+  koordinat_pulang: string;
+  foto_pulang: File;
 };

@@ -6,6 +6,7 @@ import {
   IconMoonStars,
   IconReportMoney,
   IconCalendarDot,
+  IconCalendarUser,
 } from "@tabler/icons-react";
 
 export interface NavLink {
@@ -25,6 +26,12 @@ export const userSidelinks: SideLink[] = [
     label: "",
     href: "/user/dashboard",
     icon: <IconLayoutDashboard size={18} />,
+  },
+  {
+    title: "Jadwal Kerja",
+    label: "",
+    href: "/user/jadwal",
+    icon: <IconCalendarUser size={18} />,
   },
   {
     title: "Riwayat Absensi",

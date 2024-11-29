@@ -1,14 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
 import Image from "next/image";
-import { AbsensiActions } from "./AbsensiActions";
 import { Absensi } from "@/store/absensi/absensi.types";
 import { useAbsensiStore } from "@/store/absensi/absensiStore";
 import { IconEye } from "@tabler/icons-react";
 import { Button } from "@/components/custom/button";
 import { useJamKerjaStore } from "@/store/jamKerja/jamKerjaStore";
+import Modal from "@/components/custom/modal";
+import { useState } from "react";
 
 export const absensiColumns: ColumnDef<Absensi>[] = [
   {
@@ -78,13 +80,7 @@ export const absensiColumns: ColumnDef<Absensi>[] = [
     cell: ({ row }) => (
       <>
         {row.original.foto_masuk && (
-          <Image
-            src={row.original.foto_masuk}
-            width={65}
-            height={65}
-            alt="image pegawai"
-            className="rounded"
-          />
+          <DetailImage imageSrc={row.original.foto_masuk} type="Masuk" />
         )}
       </>
     ),
@@ -97,12 +93,7 @@ export const absensiColumns: ColumnDef<Absensi>[] = [
     cell: ({ row }) => (
       <>
         {row.original.foto_pulang && (
-          <Image
-            src={row.original.foto_pulang}
-            width={50}
-            height={50}
-            alt="image pegawai"
-          />
+          <DetailImage imageSrc={row.original.foto_pulang} type="Pulang" />
         )}
       </>
     ),
@@ -157,13 +148,6 @@ export const absensiColumns: ColumnDef<Absensi>[] = [
       );
     },
   },
-  // {
-  //   id: "actions",
-  //   header: ({ column }) => (
-  //     <DataTableColumnHeader column={column} title="Action" />
-  //   ),
-  //   cell: ({ row }) => <AbsensiActions row={row} />,
-  // },
 ];
 
 const JadwalCell = ({ row }: any) => {
@@ -198,5 +182,42 @@ const KoordinatCell = ({ row }: any) => {
       <span className="sr-only">Detail</span>
       <IconEye className="h-4 w-4" />
     </Button>
+  );
+};
+
+export const DetailImage = ({
+  imageSrc,
+  type,
+}: {
+  imageSrc: string;
+  type?: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <>
+      <Image
+        onClick={() => setIsOpen(true)}
+        src={imageSrc}
+        width={65}
+        height={65}
+        alt="image pegawai"
+        className="rounded"
+      />
+      <Modal
+        textHeader={`Detail Foto Absensi ${type ?? ""}`}
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+      >
+        <div className="flex justify-center">
+          <Image
+            src={imageSrc}
+            width={400}
+            height={400}
+            alt="image pegawai"
+            className="rounded"
+          />
+        </div>
+      </Modal>
+    </>
   );
 };

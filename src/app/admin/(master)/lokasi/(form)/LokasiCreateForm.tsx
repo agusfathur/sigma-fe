@@ -47,7 +47,6 @@ export default function LokasiCreateForm({ onSuccess }: LokasiCreateFormProps) {
       const { latitude, longitude } = position.coords;
       setLokasi({ latitude, longitude });
       setMapKey(mapKey + 1);
-      console.log(latitude, longitude);
     });
   };
 

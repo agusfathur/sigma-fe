@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { DataTable } from "@/components/table/data-table";
 import { useEffect, useState } from "react";
 import Modal from "@/components/custom/modal";
 import { useAbsensiStore } from "@/store/absensi/absensiStore";
@@ -9,7 +8,7 @@ import { absensiColumns } from "./AbsensiColumns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useJamKerjaStore } from "@/store/jamKerja/jamKerjaStore";
 import { Button } from "@/components/custom/button";
-import UserLemburTable from "../(table) copy/LemburTable";
+import UserLemburTable from "../(table lembur)/LemburTable";
 import { useSession } from "next-auth/react";
 import { Absensi } from "@/store/absensi/absensi.types";
 import { useJadwalKerjaStore } from "@/store/jadwalKerja/jadwalKerjaStore";
@@ -176,16 +175,6 @@ const AbsensiTable = () => {
     await fetchAllAbsensiByUserFilter(session?.user?.id as string, query);
   };
 
-  const countStatusAbsen = (status: string) => {
-    return absensis.filter((absen) => absen.status_absen === status).length;
-  };
-
-  // Contoh penggunaan:
-  const hadirCount = countStatusAbsen("hadir");
-  const izinCount = countStatusAbsen("izin");
-  const sakitCount = countStatusAbsen("sakit");
-  const terlambatCount = countStatusAbsen("terlambat");
-  const tidakHadirCount = countStatusAbsen("tidak_hadir");
 
   useEffect(() => {
     getTahunOption();
@@ -193,7 +182,13 @@ const AbsensiTable = () => {
     fetchJamKerja();
     fetchAllAbsensiByUserFilter(session?.user?.id as string, query);
     fetchJadwalKerjaPegawaiByUserFilter(session?.user?.id as string, query);
-  }, [fetchAllAbsensiByUserFilter, session?.user?.id]);
+  }, [
+    fetchAllAbsensiByUserFilter,
+    fetchJadwalKerjaPegawaiByUserFilter,
+    fetchJamKerja,
+    query,
+    session?.user?.id,
+  ]);
 
   return (
     <>
@@ -209,25 +204,7 @@ const AbsensiTable = () => {
             <h3 className="font-medium">
               Filter : <span>{textFilter}</span>
             </h3>
-            <div className="flex items-center space-x-1 md:space-x-2">
-              <h4 className="text-sm font-bold">Total</h4>
-              <p className="rounded-xl bg-green-100 px-2.5 py-1 text-sm font-medium text-green-950">
-                Hadir : <span className="font-bold">{hadirCount}</span>
-              </p>
-              <p className="rounded-xl bg-red-100 px-2.5 py-1 text-sm font-medium text-red-950">
-                Tidak Hadir :{" "}
-                <span className="font-bold">{tidakHadirCount}</span>
-              </p>
-              <p className="rounded-xl bg-yellow-100 px-2.5 py-1 text-sm font-medium text-yellow-950">
-                Terlambat : <span className="font-bold">{terlambatCount}</span>
-              </p>
-              <p className="rounded-xl bg-blue-100 px-2.5 py-1 text-sm font-medium text-blue-950">
-                Izin : <span className="font-bold">{izinCount}</span>
-              </p>
-              <p className="rounded-xl bg-cyan-100 px-2.5 py-1 text-sm font-medium text-cyan-950">
-                Cuti : <span className="font-bold">{izinCount}</span>
-              </p>
-            </div>
+           
             <AbsensiCustomTable
               mappedAbsensis={absensis}
               jadwals={jadwals}

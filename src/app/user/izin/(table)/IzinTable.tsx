@@ -230,49 +230,6 @@ const IzinTable = () => {
 
       {/* modal div */}
       <>
-        {/* update status */}
-        {/* <Modal
-          isOpen={isModalEditOpen}
-          textHeader="Update Status Permohonan Izin"
-          heightScreenSize="lg"
-          onClose={() => setIsModalEditOpen(false)}
-        >
-          <Select
-            options={statusOptions}
-            className="w-full rounded-md dark:text-black"
-            classNamePrefix="react-select"
-            placeholder="Select status lembur"
-            theme={(theme) => ({
-              ...theme,
-              colors: {
-                ...theme.colors,
-                primary: "black", // Warna border saat di-focus
-                primary25: "#e5e7eb", // Warna abu-abu terang saat di-hover
-                primary50: "#d1d5db", // Warna abu-abu saat di-click
-                neutral20: "black", // Border default
-                neutral80: "black",
-              },
-            })}
-            onChange={(selectedOption) =>
-              setStatusIzin(selectedOption ? String(selectedOption.value) : "")
-            }
-            defaultValue={
-              statusOptions.find(
-                (option: any) =>
-                  String(option.value) === String(permohonanIzinData?.status),
-              ) || null
-            }
-            value={
-              statusOptions.find(
-                (option: any) => String(option.value) === String(statusIzin),
-              ) || null
-            }
-          />
-          <Button onClick={handleUpdate} className="mt-48 w-full">
-            Update
-          </Button>
-        </Modal> */}
-
         <Modal
           isOpen={isModalCreateOpen}
           textHeader="Permohonan Izin"
@@ -303,7 +260,7 @@ const IzinTable = () => {
               <iframe
                 src={permohonanIzinData?.bukti ?? ""}
                 width="100%"
-                height="500px"
+                height="550px"
                 className="w-full rounded-md"
               ></iframe>
             )}

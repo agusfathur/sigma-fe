@@ -154,6 +154,10 @@ export const usePegawaiStore = create<PegawaiState>((set, get) => ({
       formData.append("jabatan_fungsional_id", jabatanFungsionalId[i] || ""); // Tambahkan setiap elemen satu per satu
     }
 
+    if (pegawai.lokasi_id) formData.append("lokasi_id", pegawai.lokasi_id);
+    if (pegawai.status_pegawai)
+      formData.append("status_pegawai", pegawai.status_pegawai);
+
     if (pegawai.foto) {
       formData.append("foto", pegawai.foto);
     }
