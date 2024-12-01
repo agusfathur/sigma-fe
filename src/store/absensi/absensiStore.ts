@@ -90,15 +90,16 @@ export const useAbsensiStore = create<AbsensiState>((set, get) => ({
     const tanggal = new Date()
       .toLocaleDateString("id-ID")
       .split("/")
+      .map((part) => part.padStart(2, "0"))
       .reverse()
       .join("-");
-    // const waktu = new Date();
-    // const jamMasuk =
-    //   (waktu.getHours() < 10 ? "0" + waktu.getHours() : waktu.getHours()) +
-    //   ":" +
-    //   (waktu.getMinutes() < 10 ? "0" + waktu.getMinutes() : waktu.getMinutes());
+    const waktu = new Date();
+    const jamMasuk =
+      (waktu.getHours() < 10 ? "0" + waktu.getHours() : waktu.getHours()) +
+      ":" +
+      (waktu.getMinutes() < 10 ? "0" + waktu.getMinutes() : waktu.getMinutes());
 
-    const jamMasuk = "06:55";
+    // const jamMasuk = "06:55";
     const pegawai = await axiosJWT.get(
       `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai/user/${absensiMasuk.user_id}`,
     );
@@ -115,34 +116,31 @@ export const useAbsensiStore = create<AbsensiState>((set, get) => ({
     formData.append("jadwal_id", jadwalData[0].id_jadwal);
     formData.append("foto_masuk", absensiMasuk.foto_masuk);
     console.log(absensiMasuk.koordinat_masuk, { tanggal });
-    try {
-      const create = await axiosJWT.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/absensi/masuk`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+    const create = await axiosJWT.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/absensi/masuk`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
         },
-      );
-      return create.data;
-    } catch (error) {
-      console.log(error);
-    }
+      },
+    );
+    return create.data;
   },
   insertAbsensiPulang: async (absensiPulang: CreateAbsensiPulang) => {
     const tanggal = new Date()
       .toLocaleDateString("id-ID")
       .split("/")
+      .map((part) => part.padStart(2, "0"))
       .reverse()
       .join("-");
-    // const waktu = new Date();
-    // const jamMasuk =
-    //   (waktu.getHours() < 10 ? "0" + waktu.getHours() : waktu.getHours()) +
-    //   ":" +
-    //   (waktu.getMinutes() < 10 ? "0" + waktu.getMinutes() : waktu.getMinutes());
+    const waktu = new Date();
+    const jamMasuk =
+      (waktu.getHours() < 10 ? "0" + waktu.getHours() : waktu.getHours()) +
+      ":" +
+      (waktu.getMinutes() < 10 ? "0" + waktu.getMinutes() : waktu.getMinutes());
 
-    const jamMasuk = "14:05";
+    // const jamMasuk = "14:05";
     const pegawai = await axiosJWT.get(
       `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai/user/${absensiPulang.user_id}`,
     );
@@ -157,20 +155,16 @@ export const useAbsensiStore = create<AbsensiState>((set, get) => ({
     formData.append("waktu_pulang", jamMasuk);
     formData.append("jadwal_id", jadwalData[0].id_jadwal);
     formData.append("foto_pulang", absensiPulang.foto_pulang);
-    try {
-      const create = await axiosJWT.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/absensi/pulang`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+    const create = await axiosJWT.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/absensi/pulang`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
         },
-      );
-      return create.data;
-    } catch (error) {
-      console.log(error);
-    }
+      },
+    );
+    return create.data;
   },
   checkAbsensi: async (userId: string, tanggal: string) => {
     const pegawai = await axiosJWT.get(

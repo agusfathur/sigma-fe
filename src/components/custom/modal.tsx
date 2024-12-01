@@ -42,7 +42,7 @@ const Modal = ({
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 flex items-center justify-center"
+          className="fixed inset-0 z-50 flex items-center justify-center"
           onClick={() => onClose && onClose()} // Menambahkan onClick untuk menutup modal ketika klik di luar konten
         >
           {/* Background Blur and Dark Overlay */}i
@@ -53,7 +53,7 @@ const Modal = ({
             onClick={(e) => e.stopPropagation()} // Mencegah event onClick pada container luar
           >
             <div
-              className={`relative ${heights[heightScreenSize]} max-h-[80vh] w-full overflow-y-auto rounded-lg bg-white shadow dark:bg-gray-700 md:max-h-[90vh]`}
+              className={`relative ${heights[heightScreenSize]} max-h-[80vh] w-full overflow-y-auto rounded-lg bg-white shadow dark:bg-slate-700 md:max-h-[90vh]`}
             >
               {/* Modal header */}
               <div className="flex items-center justify-between rounded-t border-b px-4 py-3 dark:border-gray-600 md:px-5 md:py-3">

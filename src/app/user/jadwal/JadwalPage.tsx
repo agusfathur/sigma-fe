@@ -109,8 +109,6 @@ const JadwalPage = () => {
     });
   }
 
-  console.log({ dataLibur, jadwal });
-
   useEffect(() => {
     fetchDataLibur();
     fetchJadwal(
@@ -128,7 +126,12 @@ const JadwalPage = () => {
             type="month"
             className="my-4 w-1/2 rounded-sm border border-slate-900 px-4 py-2 text-lg text-black lg:w-1/3"
             lang="id"
-            defaultValue={new Date().toISOString().slice(0, 7)}
+            defaultValue={new Date()
+              .toLocaleDateString("id-ID")
+              .split("/")
+              .reverse()
+              .slice(0, 2)
+              .join("-")}
             onChange={async (e) => {
               const selectedDate = new Date(e.target.value);
               const newMonth = selectedDate.getMonth();
@@ -138,7 +141,6 @@ const JadwalPage = () => {
 
               const newQuery = `tahun=${newYear}&bulan=${newMonth + 1}`;
               await fetchJadwal(session?.user.id as string, newQuery);
-              console.log({ month: newMonth, year: newYear });
             }}
           />
         </header>

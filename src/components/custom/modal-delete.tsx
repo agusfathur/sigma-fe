@@ -1,3 +1,4 @@
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Button } from "./button";
 
 const ModalDelete = ({
@@ -12,21 +13,7 @@ const ModalDelete = ({
   return (
     <>
       <div className="p-4 text-center md:p-5">
-        <svg
-          className="mx-auto mb-4 h-12 w-12 text-gray-400 dark:text-gray-200"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 20 20"
-        >
-          <path
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-          />
-        </svg>
+        <DotLottieReact src="/lottie/alert.lottie" loop autoplay />
         <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
           {textHeader}
         </h3>

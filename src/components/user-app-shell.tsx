@@ -11,7 +11,7 @@ export default function UserAppShell({
   const [isCollapsed, setIsCollapsed] = useIsCollapsed();
 
   return (
-    <div className="relative h-full overflow-hidden bg-background">
+    <div className="relative h-full overflow-hidden bg-gradient-to-tr from-white via-white to-violet-400/30 dark:from-slate-950 dark:via-slate-950 dark:to-violet-950/40">
       <UserSidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
       <main
         id="content"

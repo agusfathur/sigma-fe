@@ -6,22 +6,6 @@ import { Button } from "@/components/custom/button";
 import { SlipGaji } from "@/store/slipGaji/slipGaji.types";
 import { SlipGajiActions } from "./SlipGajiActions";
 
-//     gaji_pokok           Int             @default(0) @db.Integer
-//     tunjangan_tetap      Int             @default(0) @db.Integer
-//     tunjangan_kehadiran  Int             @default(0) @db.Integer
-//     tunjangan_fungsional Int             @default(0) @db.Integer
-//     tunjangan_bonus      Int             @default(0) @db.Integer
-//     tunjangan_lembur     Int             @default(0) @db.Integer
-//     pajak                Int             @default(0) @db.Integer
-//     pinjaman             Int             @default(0) @db.Integer
-//     potong_gaji          Int             @default(0) @db.Integer
-//     total_gaji_kotor     Int             @default(0) @db.Integer
-//     total_gaji_bersih    Int             @default(0) @db.Integer
-//     tanggal              DateTime        @db.Date
-//     status_pembayaran    StatusPmbayaran @default(pending)
-//     bulan                Int             @db.Integer
-//     tahun                Int             @db.Integer
-
 export const SlipGajiColumns: ColumnDef<SlipGaji>[] = [
   {
     id: "no",
@@ -39,6 +23,27 @@ export const SlipGajiColumns: ColumnDef<SlipGaji>[] = [
     cell: ({ row }) => <span>{row.original.pegawai.nama}</span>,
   },
   {
+    accessorKey: "bulan tahun",
+
+    accessorFn: (row) =>
+      `${new Intl.DateTimeFormat("id-ID", {
+        month: "long",
+        year: "numeric", // Tambahkan jika ingin menampilkan tahun juga
+      }).format(new Date(row.tahun, row.bulan - 1))}`,
+
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Bulan" />
+    ),
+    cell: ({ row }) => (
+      <span>
+        {new Intl.DateTimeFormat("id-ID", {
+          month: "long",
+          year: "numeric", // Tambahkan jika ingin menampilkan tahun juga
+        }).format(new Date(row.original.tahun, row.original.bulan - 1))}
+      </span>
+    ),
+  },
+  {
     accessorKey: "total_gaji_bersih",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Total Gaji Bersih" />
@@ -50,38 +55,7 @@ export const SlipGajiColumns: ColumnDef<SlipGaji>[] = [
       return <span>Rp. {total}</span>;
     },
   },
-  {
-    id: "tanggal",
-    accessorFn: (row) => {
-      const tanggalHari = new Intl.DateTimeFormat("id-ID", {
-        dateStyle: "full",
-      }).format(new Date(row.tanggal));
 
-      const tanggal = new Intl.DateTimeFormat("id-ID", {
-        dateStyle: "medium",
-      }).format(new Date(row.tanggal));
-
-      return `${tanggalHari.split(",")[0]}, ${tanggal}`;
-    },
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Tanggal" />
-    ),
-    cell: ({ row }) => {
-      const tanggalHari = new Intl.DateTimeFormat("id-ID", {
-        dateStyle: "full",
-      }).format(new Date(row.getValue("tanggal")));
-
-      const tanggal = new Intl.DateTimeFormat("id-ID", {
-        dateStyle: "medium",
-      }).format(new Date(row.getValue("tanggal")));
-
-      return (
-        <span>
-          {tanggalHari.split(",")[0]}, {tanggal}
-        </span>
-      );
-    },
-  },
   {
     accessorKey: "status_pembayaran",
     header: ({ column }) => (

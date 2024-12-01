@@ -2,30 +2,95 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { Button } from "@/components/custom/button";
-import ContentSection from "@/components/custom/conten-separator";
 import Modal from "@/components/custom/modal";
+import ModalAlert from "@/components/custom/modal-alert";
+import axiosJWT from "@/lib/authJWT";
 import { useAbsensiStore } from "@/store/absensi/absensiStore";
+import { useJadwalKerjaStore } from "@/store/jadwalKerja/jadwalKerjaStore";
+import { Pegawai } from "@/store/pegawai/pegawai.types";
 import {
   IconCalendarDot,
   IconCalendarUser,
   IconCashRegister,
+  IconClock,
   IconFaceId,
+  IconHourglass,
+  IconHourglassLow,
   IconMoonStars,
   IconReportMoney,
 } from "@tabler/icons-react";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
 
 const UserDashboardPage = () => {
   const { data: session } = useSession();
+  const [showModalAlert, setShowModalAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState({
+    message: "",
+    type: "",
+  });
+  const [pegawai, setPegawai] = useState<Pegawai>({} as Pegawai);
+  const [currentTime, setCurrentTime] = useState<string>("");
+  const [waktuAbsen, setWaktuAbsen] = useState({
+    masuk: "",
+    pulang: "",
+  });
+
+  const [jamKerja, setJamKerja] = useState({
+    waktu_masuk: "-",
+    waktu_pulang: "-",
+  });
+  const thisDay = new Intl.DateTimeFormat("id-ID", {
+    dateStyle: "full",
+  }).format(new Date());
+
   const [showModal, setShowModal] = useState(false);
-  const [showModal2, setShowModal2] = useState(false);
   const [lokasi, setLokasi] = useState({ latitude: 0, longitude: 0 });
   const absenMasuk = useAbsensiStore((state) => state.insertAbsensiMasuk);
   const absenPulang = useAbsensiStore((state) => state.insertAbsensiPulang);
   const checkAbsensi = useAbsensiStore((state) => state.checkAbsensi);
+
+  const jadwalKerja = useJadwalKerjaStore((state) => state.jadwalKerja);
+  const fetchJadwalKerjaPegawaiByUserFilter = useJadwalKerjaStore(
+    (state) => state.fetchJadwalKerjaPegawaiByUserFilter,
+  );
+
+  const menuItems = [
+    {
+      title: "Absensi",
+      icon: <IconFaceId className="h-10 w-10 text-slate-900" />,
+      href: "/user/riwayat-absensi",
+    },
+    {
+      title: "Izin Cuti",
+      icon: <IconCalendarDot className="h-10 w-10 text-slate-900" />,
+      href: "/user/izin",
+    },
+    {
+      title: "Jadwal",
+      icon: <IconCalendarUser className="h-10 w-10 text-slate-900" />,
+      href: "/user/jadwal",
+    },
+
+    {
+      title: "Pinjaman",
+      icon: <IconReportMoney className="h-10 w-10 text-slate-900" />,
+      href: "/user/pinjaman",
+    },
+    {
+      title: "THR",
+      icon: <IconMoonStars className="h-10 w-10 text-slate-900" />,
+      href: "/user/thr",
+    },
+    {
+      title: "Slip Gaji",
+      icon: <IconCashRegister className="h-10 w-10 text-slate-900" />,
+      href: "/user/slip-gaji",
+    },
+  ];
 
   const getLocation = async () => {
     if ("geolocation" in navigator) {
@@ -95,6 +160,41 @@ const UserDashboardPage = () => {
     }
   };
 
+  const getWaktuAbsen = async () => {
+    const tanggal = new Date()
+      .toLocaleDateString("id-ID")
+      .split("/")
+      .map((part) => part.padStart(2, "0"))
+      .reverse()
+      .join("-");
+
+    try {
+      const checkAbsen = await checkAbsensi(
+        session?.user.id as string,
+        tanggal,
+      );
+      if (checkAbsen.length > 0) {
+        setWaktuAbsen({
+          masuk: checkAbsen[0].waktu_masuk,
+          pulang: checkAbsen[0].waktu_pulang,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getUserIdentity = async () => {
+    try {
+      const res = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai/user/${session?.user.id}`,
+      );
+      setPegawai(res.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const insertAbsensi = async () => {
     let imageFile: File | null = null;
     if (webcamRef.current) {
@@ -108,40 +208,126 @@ const UserDashboardPage = () => {
       imageFile = new File([blob], "foto_masuk.jpg", { type: blob.type });
     }
 
-    const koordinat = await getLocation();
-    if (koordinat) {
-      console.log("Lokasi Absen:", koordinat);
-    }
+    await getLocation();
 
     const tanggal = new Date()
       .toLocaleDateString("id-ID")
       .split("/")
+      .map((part) => part.padStart(2, "0"))
       .reverse()
       .join("-");
 
-    const checkAbsen = await checkAbsensi(session?.user.id as string, tanggal);
-    if (checkAbsen.length > 0) {
-      await absenPulang({
-        user_id: session?.user.id as string,
-        koordinat_pulang: `${lokasi.latitude}, ${lokasi.longitude}`,
-        foto_pulang: imageFile as File,
-      });
-    } else {
-      await absenMasuk({
-        user_id: session?.user.id as string,
-        koordinat_masuk: `${lokasi.latitude}, ${lokasi.longitude}`,
-        foto_masuk: imageFile as File,
-      });
+    try {
+      const checkAbsen = await checkAbsensi(
+        session?.user.id as string,
+        tanggal,
+      );
+      if (checkAbsen.length > 0) {
+        await absenPulang({
+          user_id: session?.user.id as string,
+          koordinat_pulang: `${lokasi.latitude}, ${lokasi.longitude}`,
+          foto_pulang: imageFile as File,
+        });
+        await getWaktuAbsen();
+        setShowModal(false);
+        setAlertMessage({
+          message: `Absen Masuk Berhasil`,
+          type: "success",
+        });
+        setShowModalAlert(true);
+      } else {
+        await absenMasuk({
+          user_id: session?.user.id as string,
+          koordinat_masuk: `${lokasi.latitude}, ${lokasi.longitude}`,
+          foto_masuk: imageFile as File,
+        });
+        await getWaktuAbsen();
+        setShowModal(false);
+        setAlertMessage({
+          message: `Absen Pulang Berhasil`,
+          type: "success",
+        });
+        setShowModalAlert(true);
+      }
+    } catch (error: Error | any) {
+      const errMsg = error.response.data.message;
+      if (errMsg) {
+        setShowModal(false);
+        setAlertMessage({
+          message: errMsg,
+          type: "error",
+        });
+        setShowModalAlert(true);
+      }
     }
   };
+
+  const fetchJamKerja = async () => {
+    const date = new Date()
+      .toLocaleDateString("id-ID")
+      .split("/")
+      .map((part) => part.padStart(2, "0"))
+      .reverse()
+      .join("-");
+
+    try {
+      const pegawai = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai/user/${session?.user.id}`,
+      );
+      const pegawaiId = pegawai.data.data.id_pegawai;
+      const res = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/jadwal-pegawai/pegawai/${pegawaiId}?tanggal=${date}`,
+      );
+
+      if (res.data.data.length > 0) {
+        setJamKerja({
+          waktu_masuk: res.data.data[0].shift_kerja.waktu_masuk,
+          waktu_pulang: res.data.data[0].shift_kerja.waktu_pulang,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getUserIdentity();
+    getWaktuAbsen();
+    fetchJamKerja();
+  }, [session?.user.id]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const date = new Date();
+      const timeString = date.toLocaleTimeString("id-ID", { hour12: false }); // Menampilkan waktu dalam format 24 jam
+      setCurrentTime(timeString);
+    }, 1000); // Update setiap detik
+
+    // Bersihkan interval ketika komponen di-unmount
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
-    <ContentSection title="Dashboard" desc="Dashboard User">
-      <div>
-        <Modal
-          isOpen={showModal}
-          onClose={() => setShowModal(false)}
-          textHeader="Absensi"
-        >
+    <div>
+      <div className="mb-5 flex items-center justify-between space-y-2">
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard User</h1>
+        <Button onClick={() => setShowModalAlert(true)}>ALERT</Button>
+      </div>
+
+      <ModalAlert
+        isOpen={showModalAlert}
+        textHeader={alertMessage.message}
+        type={alertMessage.type as "success" | "error"}
+        setIsModalAlertOpen={() => setShowModalAlert(false)}
+      />
+
+      {/* modal absen*/}
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        textHeader="Absensi"
+      >
+        <div className="space-y-4">
           <Webcam
             ref={webcamRef}
             audio={false}
@@ -152,79 +338,144 @@ const UserDashboardPage = () => {
             onUserMediaError={handleUserMediaError}
             className="rounded-md"
           />
-          <Button onClick={insertAbsensi} variant={"destructive"}>
+
+          <Button
+            onClick={insertAbsensi}
+            className="w-full rounded-lg bg-violet-800 px-4 py-2 text-white transition duration-150 hover:bg-violet-900 active:scale-95"
+          >
             Absen
           </Button>
-        </Modal>
-        <Modal
-          isOpen={showModal2}
-          onClose={() => setShowModal2(false)}
-          textHeader="Absensi"
-        >
-          <p>modal 2</p>
-        </Modal>
-        <Button onClick={() => setShowModal(true)}>Absen</Button>
-        <div className="lg:justify- h-80 w-full space-y-4 rounded border-b-2 border-t-2 border-slate-900 bg-white">
-          {/* layer up */}
-          <div className="my-2 flex justify-around space-x-4">
-            <Link
-              href={"/user/riwayat-absensi"}
-              className="flex h-20 w-20 cursor-pointer flex-col items-center justify-between rounded-sm border-[2px] border-black py-2 shadow-[2px_5px_0px_1px_rgba(0,0,0,1)] active:scale-95"
-            >
-              <IconFaceId className="h-8 w-8 text-black" />
-              <h5 className="text-center text-xs font-bold text-black">
-                Absensi
-              </h5>
-            </Link>
+        </div>
+      </Modal>
 
-            <Link
-              href={"/user/izin"}
-              className="flex h-20 w-20 flex-col items-center rounded-sm border-[2px] border-black py-2 shadow-[2px_5px_0px_1px_rgba(0,0,0,1)] hover:scale-95 active:scale-90"
-            >
-              <IconCalendarDot className="h-8 w-8 text-black" />
-              <h5 className="mt-2 text-center text-xs font-semibold text-black">
-                Izin
+      <div className="via-slate-960 mx-auto my-4 max-w-lg space-y-4 rounded-lg bg-gradient-to-t from-violet-950 to-slate-900 px-6 py-4 shadow-lg lg:max-w-full">
+        <div className="flex justify-between">
+          <div className="flex items-center space-x-2">
+            <IconCalendarDot className="h-5 w-5 text-white" />
+            <h5 className="text-md font-medium text-white">{thisDay}</h5>
+          </div>
+          <div className="flex items-center space-x-2">
+            <IconHourglassLow className="h-5 w-5 text-white" />
+            <h5 className="text-md font-bold text-white">{currentTime}</h5>
+          </div>
+        </div>
+
+        {/* card jadwal */}
+        <div className="flex items-center justify-between space-x-4">
+          {/* Card Masuk */}
+          <div className="flex items-center space-x-2">
+            <IconCalendarUser className="h-5 w-5 text-white" />
+            <h5 className="text-md font-medium text-white">Jadwal Kerja</h5>
+          </div>
+          <div className="flex space-x-2">
+            <div className="flex items-center space-x-2 rounded-lg bg-slate-500 bg-opacity-60 px-3 py-1 text-center backdrop-blur-2xl backdrop-filter">
+              <h5 className="text-md font-medium text-white">
+                Masuk:
+                <span className="ml-1">{jamKerja.waktu_masuk ?? "-"}</span>
               </h5>
-            </Link>
-            <div className="flex h-20 w-20 flex-col items-center rounded-sm border-[2px] border-black py-2 shadow-[2px_5px_0px_1px_rgba(0,0,0,1)]">
-              <IconCalendarUser className="h-8 w-8 text-black" />
-              <h5 className="mt-2 text-center text-xs font-semibold text-black">
-                Jadwal
+            </div>
+
+            {/* Card Pulang */}
+            <div className="flex items-center space-x-2 rounded-lg bg-slate-500 bg-opacity-60 px-3 py-1 text-center backdrop-blur-2xl backdrop-filter">
+              <h5 className="text-md font-medium text-white">
+                Pulang:
+                <span className="ml-1">{jamKerja.waktu_pulang ?? "-"}</span>
               </h5>
             </div>
           </div>
-          {/* layer up end */}
-          {/* layer down */}
-          <div className="my-2 flex justify-around space-x-4">
-            <div className="flex flex-col items-center">
-              <div className="flex items-center justify-center rounded-full bg-black p-2">
-                <IconCashRegister className="h-6 w-6 text-white" />
-              </div>
-              <h5 className="mt-2 text-center text-xs font-semibold text-black">
-                Gaji
-              </h5>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="flex items-center justify-center rounded-full bg-black p-2">
-                <IconMoonStars className="h-6 w-6 text-white" />
-              </div>
-              <h5 className="mt-2 text-center text-xs font-semibold text-black">
-                THR
-              </h5>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="flex items-center justify-center rounded-full bg-black p-2">
-                <IconReportMoney className="h-6 w-6 text-white" />
-              </div>
-              <h5 className="mt-2 text-center text-xs font-semibold text-black">
-                Pinjaman
-              </h5>
-            </div>
-          </div>
-          {/* layer down end */}
         </div>
       </div>
-    </ContentSection>
+
+      {/* card absen */}
+      <div className="mx-auto max-w-lg rounded-lg bg-gradient-to-t from-slate-900 via-slate-900 to-violet-950 p-6 shadow-lg lg:max-w-full">
+        {/* Card Utama dengan Warna Gradasi */}
+
+        <div className="flex w-full items-center gap-x-4">
+          {/* Foto Profil */}
+          {session?.user.image ? (
+            <Image
+              className="avatar rounded-full border-2 border-opacity-40"
+              src={session?.user.image}
+              alt="Profile"
+              height={70}
+              width={70}
+            />
+          ) : (
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300">
+              <span className="text-white">No Image</span>
+            </div>
+          )}
+
+          {/* Nama Pengguna, Jabatan dan Status Online */}
+          <div className="text-white">
+            <h3 className="text-lg font-semibold">
+              Hi{" "}
+              <span className="font-bold uppercase">{session?.user.name}</span>
+            </h3>
+            <p className="text-md font-medium">
+              Jabatan:{" "}
+              <span className="capitalize">{pegawai?.jabatan?.nama}</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Jam Masuk dan Pulang dengan Efek Kaca (Glassmorphism) */}
+
+        <div className="mt-6 flex justify-between space-x-4 lg:flex-row lg:space-y-0">
+          {/* Card Masuk dengan Efek Kaca */}
+          <div className="h-full w-1/2 rounded-xl bg-white bg-opacity-80 p-5 text-center backdrop-blur-2xl backdrop-filter">
+            <p className="font-mono text-lg font-bold text-gray-800">Masuk</p>
+            <p className="font-mono text-lg font-bold text-gray-900">
+              {waktuAbsen.masuk || "--:--"}
+            </p>
+          </div>
+
+          {/* Card Pulang dengan Efek Kaca */}
+          <div className="h-full w-1/2 rounded-xl bg-white bg-opacity-80 p-5 text-center backdrop-blur-2xl backdrop-filter">
+            <p className="font-mono text-lg font-bold text-gray-800">Pulang</p>
+            <p className="font-mono text-lg font-bold text-gray-900">
+              {waktuAbsen.pulang || "--:--"}
+            </p>
+          </div>
+        </div>
+
+        {/* Tombol Absen */}
+        <div className="mt-6 w-full">
+          <Button
+            onClick={() => setShowModal(true)}
+            className="w-full rounded-lg bg-violet-800 px-4 py-2 text-white transition duration-150 hover:bg-violet-900 active:scale-95"
+          >
+            Absensi
+          </Button>
+        </div>
+      </div>
+      {/* card absen end */}
+
+      {/* menu */}
+      <div className="via-slate-960 mx-auto my-4 max-w-lg space-y-4 rounded-lg bg-gradient-to-t from-violet-950 to-slate-900 px-6 py-4 shadow-lg lg:max-w-full">
+        <h3 className="flex justify-center text-lg font-bold text-white">
+          MENU
+        </h3>
+        <div className="mt-6 flex flex-wrap justify-between gap-x-4 gap-y-6 lg:flex-row lg:space-y-0">
+          {menuItems.map((item, index) => (
+            <div
+              key={index}
+              className="h-full w-[30%] cursor-pointer rounded-xl bg-white bg-opacity-80 p-5 text-center backdrop-blur-2xl backdrop-filter transition duration-150 hover:scale-110 hover:bg-gray-300 active:scale-90 active:bg-gray-300 lg:w-[14%]"
+            >
+              <Link
+                href={item.href}
+                className="flex h-full flex-col items-center justify-center space-y-4"
+              >
+                {item.icon}
+                <h5 className="text-md text-center font-mono font-bold text-slate-900">
+                  {item.title}
+                </h5>
+              </Link>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 

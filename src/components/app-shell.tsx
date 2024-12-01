@@ -7,7 +7,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useIsCollapsed();
 
   return (
-    <div className="bg-background relative h-full overflow-hidden">
+    <div className="relative h-full overflow-hidden bg-gradient-to-tr from-white via-white to-violet-400/30 dark:from-slate-950 dark:via-slate-950 dark:to-violet-950/40">
       <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
       <main
         id="content"

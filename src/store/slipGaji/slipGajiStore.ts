@@ -8,6 +8,7 @@ interface SlipGajiState {
   fetchSlipGaji: () => Promise<void>;
   fetchSlipGajiByFilter: (filter: string) => Promise<void>;
   fetchSlipGajiByPegawai: (pegawaiId: string) => Promise<void>;
+  fetchSlipGajiByUserPegawai: (userId: string, filter: string) => Promise<void>;
   insertSlipGaji: (slipGaji: SlipGajiCreate) => Promise<any>;
   updateSlipGaji: (slipGaji: SlipGajiUpdate) => Promise<any>;
   updateStatusSlipGaji: (id: string, status: string) => Promise<any>;
@@ -42,7 +43,6 @@ export const useSlipGajiStore = create<SlipGajiState>((set, get) => ({
       const res = await axiosJWT.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/slip-gaji?${filter}`,
       );
-      console.log(res.data);
 
       set({ slipGaji: res.data.data });
     } catch (error) {
@@ -54,6 +54,23 @@ export const useSlipGajiStore = create<SlipGajiState>((set, get) => ({
       const res = await axiosJWT.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/slip-gaji/pegawai/${pegawaiId}`,
       );
+
+      set({ slipGaji: res.data.data });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  fetchSlipGajiByUserPegawai: async (userId: string, filter: string) => {
+    try {
+      const pegawai = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai/user/${userId}`,
+      );
+      const pegawaiId = pegawai.data.data.id_pegawai;
+      const res = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/slip-gaji/pegawai/${pegawaiId}?${filter}`,
+      );
+
+      console.log(res.data);
 
       set({ slipGaji: res.data.data });
     } catch (error) {
