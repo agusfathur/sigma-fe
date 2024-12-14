@@ -9,8 +9,16 @@ import { pegawaiColumns } from "./PegawaiColumns";
 import PegawaiCreateForm from "../(form)/PegawaiCreateForm";
 import PegawaiEditForm from "../(form)/PegawaiEditForm";
 import PegawaiDetail from "../(form)/PegawaiDetail";
+import ModalToast from "@/components/custom/modal-toast";
+import { useToastStore } from "@/store/toastStore";
 
 const PegawaiTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const fetchPegawai = usePegawaiStore((state) => state.fetchPegawai);
   const pegawais = usePegawaiStore((state) => state.pegawai);
 
@@ -53,7 +61,17 @@ const PegawaiTable = () => {
     try {
       await deleteJadwalKerja(pegawaiData?.id_pegawai);
       await fetchPegawai();
+      setToast({
+        isOpen: true,
+        message: "Pegawai berhasil dihapus",
+        type: "success",
+      });
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Pegawai gagal dihapus",
+        type: "error",
+      });
       console.log(error);
     } finally {
       setIsModalDeleteOpen(false);
@@ -61,6 +79,14 @@ const PegawaiTable = () => {
   };
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <DataTable
         data={pegawais}
         columns={pegawaiColumns}

@@ -17,15 +17,27 @@ import { Button } from "@/components/custom/button";
 import { useDataLiburStore } from "@/store/dataLibur/dataLiburStore";
 import { DataLiburCreateSchema, TypeDataLiburCreate } from "./DataLiburSchema";
 import { useKategoriLiburStore } from "@/store/kategoriLibur/kategoriLiburStore";
+import { useToastStore } from "@/store/toastStore";
 
 interface DataLiburCreateFormProps {
   onSuccess: () => void;
+}
+
+interface Option {
+  value: string;
+  label: string;
 }
 
 export default function DataLiburCreateForm({
   onSuccess,
 }: DataLiburCreateFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
 
   const [tanggal, setTanggal] = useState("");
 
@@ -35,12 +47,12 @@ export default function DataLiburCreateForm({
   );
   const kategoriLibur = useKategoriLiburStore((state) => state.kategoriLibur);
 
-  const kategoriLiburOptions = kategoriLibur.map((kategoriLibur) => ({
+  const kategoriLiburOptions: Option[] = kategoriLibur.map((kategoriLibur) => ({
     value: kategoriLibur.id_kategori_libur,
     label: kategoriLibur.jenis,
   }));
 
-  const statusAbsenOptions = [
+  const statusAbsenOptions: Option[] = [
     { value: "hadir", label: "Hadir" },
     { value: "tidak_hadir", label: "Tidak Hadir" },
   ];
@@ -66,8 +78,18 @@ export default function DataLiburCreateForm({
       });
       formDataLibur.reset();
       onSuccess();
+      setToast({
+        isOpen: true,
+        message: "Data Libur Berhasil Ditambahkan",
+        type: "success",
+      });
     } catch (error) {
-      console.error("Error Insert Jabatan:", error);
+      setToast({
+        isOpen: true,
+        message: "Data Libur Gagal Ditambahkan",
+        type: "error",
+      });
+      console.error("Error Insert Data libur:", error);
     } finally {
       setIsLoading(false);
     }

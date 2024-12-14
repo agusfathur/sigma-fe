@@ -14,12 +14,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/custom/button";
 import { useLokasiStore } from "@/store/lokasi/lokasiStore";
 import { LokasiCreateSchema, TypeLokasiCreate } from "./LokasiSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface LokasiCreateFormProps {
   onSuccess: () => void;
 }
 
 export default function LokasiCreateForm({ onSuccess }: LokasiCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const insertLokasi = useLokasiStore((state) => state.insertLokasi);
@@ -62,8 +69,18 @@ export default function LokasiCreateForm({ onSuccess }: LokasiCreateFormProps) {
       };
       const res = await insertLokasi(createData);
       formLokasi.reset();
+      setToast({
+        isOpen: true,
+        message: "Lokasi berhasil ditambahkan",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Lokasi gagal ditambahkan",
+        type: "error",
+      });
       console.error("Error Insert Lokasi:", error);
     } finally {
       setIsLoading(false);

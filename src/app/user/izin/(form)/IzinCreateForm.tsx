@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import {
   FormControl,
@@ -19,6 +19,12 @@ import { IzinCreateSchema, TypeIzinCreateSchemaCreate } from "./IzinSchema";
 import { useJenisIzinStore } from "@/store/jenisIzin/jenisIzinStore";
 import { useSession } from "next-auth/react";
 import axiosJWT from "@/lib/authJWT";
+import { useToastStore } from "@/store/toastStore";
+import { useJadwalKerjaStore } from "@/store/jadwalKerja/jadwalKerjaStore";
+import { useAbsensiStore } from "@/store/absensi/absensiStore";
+import { PermohonanIzin } from "@/store/permohonanIzin/permohonanIzin.types";
+import { Absensi } from "@/store/absensi/absensi.types";
+import { JadwalKerja } from "@/store/jadwalKerja/jadwalKerja.types";
 
 interface IzinCreateFormProps {
   onSuccess: () => void;
@@ -31,11 +37,28 @@ interface Option {
 
 export default function IzinCreateForm({ onSuccess }: IzinCreateFormProps) {
   const { data: session } = useSession();
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
+  const [sumIzin, setSumIzin] = useState({
+    tidak_hadir: 0,
+    cuti: 0,
+  });
 
-  const insertPermohonanIzin = usePermohonanIzinStore(
-    (state) => state.insertPermohonanIzin,
-  );
+  const { fetchJadwalKerjaPegawaiByUserFilter } = useJadwalKerjaStore();
+  const { fetchAllAbsensiByUserFilter } = useAbsensiStore();
+
+  const {
+    fetchPermohonanIzinByUserFilter,
+    insertPermohonanIzin,
+    fetchPermohonanIzinByTahun,
+  } = usePermohonanIzinStore();
+  const date = useMemo(() => new Date(), []);
 
   const jenisIzin = useJenisIzinStore((state) => state.jenisIzin);
   const fetchJenisIzin = useJenisIzinStore((state) => state.fetchJenisIzin);
@@ -45,7 +68,15 @@ export default function IzinCreateForm({ onSuccess }: IzinCreateFormProps) {
     label: `${item.jenis} | ${item.nama} (sisa: ${item.jatah})`,
   }));
 
-  const jenisMohonIzinOptions = [
+  const filterJenisIzin = useMemo(() => {
+    return jenisIzin.find(
+      (item) =>
+        item.nama.toLowerCase().includes("tahunan") &&
+        item.tahun === date.getFullYear(),
+    );
+  }, [date, jenisIzin]);
+
+  const jenisMohonIzinOptions: Option[] = [
     { value: "cuti", label: "Cuti" },
     { value: "izin", label: "Izin" },
   ];
@@ -87,9 +118,83 @@ export default function IzinCreateForm({ onSuccess }: IzinCreateFormProps) {
     }
   };
 
+  const getSumIzin = useCallback(async () => {
+    const tanggalHariIni = new Date()
+      .toLocaleDateString("id-ID")
+      .split("/")
+      .map((part) => part.padStart(2, "0"))
+      .reverse()
+      .join("-");
+    try {
+      const getIzins =
+        (await fetchPermohonanIzinByTahun(
+          date.getFullYear().toString(),
+          session?.user.id as string,
+        )) || [];
+      const getJadwal =
+        (await fetchJadwalKerjaPegawaiByUserFilter(
+          session?.user.id as string,
+          `tahun=${date.getFullYear()}`,
+        )) || [];
+
+      const getAbsensi =
+        (await fetchAllAbsensiByUserFilter(
+          session?.user.id as string,
+          `tahun=${date.getFullYear()}`,
+        )) || [];
+
+      const filterIzinDiterima = getIzins.filter(
+        (izin: PermohonanIzin) => izin.status === "diterima",
+      );
+      const filterJadwal = getJadwal.filter((jadwal: JadwalKerja) => {
+        const jadwalTanggal = new Date(jadwal.tanggal); // Konversi tanggal jadwal ke objek Date
+        const hariIni = new Date(tanggalHariIni); // Konversi tanggal hari ini ke objek Date
+        return jadwalTanggal <= hariIni; // Bandingkan dua objek Date
+      });
+
+      const filterAbsensiMasuk = getAbsensi.filter(
+        (absensi: Absensi) =>
+          absensi.status_absen === "hadir" ||
+          absensi.status_absen === "terlambat",
+      );
+
+      setSumIzin({
+        cuti: filterIzinDiterima.length,
+        tidak_hadir: filterJadwal.length - filterAbsensiMasuk.length,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }, [
+    date,
+    fetchPermohonanIzinByTahun,
+    session?.user.id,
+    fetchJadwalKerjaPegawaiByUserFilter,
+    fetchAllAbsensiByUserFilter,
+  ]);
+
   const onSubmit = async (data: TypeIzinCreateSchemaCreate) => {
     setIsLoading(true);
     try {
+      const findIzin = jenisIzin.find(
+        (item) => item.id_jenis_izin === data.jenis_izin_id,
+      );
+      if (findIzin?.nama.toLowerCase().includes("tahunan")) {
+        if (
+          (filterJenisIzin?.jatah || 0) <
+          sumIzin.cuti + sumIzin.tidak_hadir + 10
+        ) {
+          formIzin.reset();
+          onSuccess();
+          setToast({
+            isOpen: true,
+            message: "Gagal: Jatah Cuti Telah Penuh",
+            type: "error",
+          });
+          return;
+        }
+      }
+
       const pegawai = await axiosJWT.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai/user/${session?.user?.id}`,
       );
@@ -104,16 +209,27 @@ export default function IzinCreateForm({ onSuccess }: IzinCreateFormProps) {
       }
       formIzin.reset();
       onSuccess();
+      setToast({
+        isOpen: true,
+        message: "izin cuti Berhasil Ditambahkan",
+        type: "success",
+      });
     } catch (error) {
-      console.error("Error Insert Tunjangan Bonus:", error);
+      setToast({
+        isOpen: true,
+        message: "izin cuti Gagal Ditambahkan",
+        type: "error",
+      });
+      console.error("Error Insert Permohonan Izin:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    getSumIzin();
     fetchJenisIzin();
-  }, [fetchJenisIzin]);
+  }, [fetchJenisIzin, getSumIzin]);
 
   return (
     <>

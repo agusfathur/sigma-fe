@@ -11,8 +11,16 @@ import TunjanganTetapPegawaiTable from "../(table pegawai)/TunjanganTetapPegawai
 import { useTunjanganTetapStore } from "@/store/tunjanganTetap/tunjanganTetapStore";
 import TunjanganTetapCreateForm from "../(form)/TunjanganTetapCreateForm";
 import TunjanganTetapEditForm from "../(form)/TunjanganTetapEditForm";
+import ModalToast from "@/components/custom/modal-toast";
+import { useToastStore } from "@/store/toastStore";
 
 const TunjanganTetapTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
 
   const tunjanganTetaps = useTunjanganTetapStore(
@@ -50,8 +58,18 @@ const TunjanganTetapTable = () => {
       await deleteTunjanganTetap(
         tunjanganTetapData?.id_tunjangan_tetap as string,
       );
+      setToast({
+        isOpen: true,
+        message: "Data tunjangan tetap berhasil dihapus",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data tunjangan tetap gagal dihapus",
+        type: "error",
+      });
       console.log(error);
     }
   };
@@ -74,6 +92,14 @@ const TunjanganTetapTable = () => {
 
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <Tabs orientation="vertical" defaultValue="table" className="space-y-4">
         <div className="w-full overflow-x-auto pb-2">
           <TabsList>

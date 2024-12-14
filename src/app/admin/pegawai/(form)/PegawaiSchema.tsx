@@ -42,6 +42,7 @@ export const PegawaiCreateSchema = z.object({
     .min(1, "Address is required")
     .max(255, "Address is too long"),
   tenaga: z.string().min(1, "Role is required").max(100, "Role is too long"),
+  status_tetap: z.string().min(1, "Status Tetap is required"),
   jabatan_id: z.string().min(1, "Position is required"),
   status_kepegawaian_id: z.string().min(1, "Status Kepegawaian is required"),
   riwayat_pendidikan: z
@@ -114,6 +115,7 @@ export const PegawaiUpdateSchema = z.object({
     .min(1, "Address is required")
     .max(255, "Address is too long"),
   tenaga: z.string().min(1, "Role is required").max(100, "Role is too long"),
+  status_tetap: z.string().min(1, "Status Tetap is required"),
   jabatan_id: z.string().min(1, "Position is required"),
   status_kepegawaian_id: z.string().min(1, "Status Kepegawaian is required"),
   riwayat_pendidikan: z

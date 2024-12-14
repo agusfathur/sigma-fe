@@ -22,14 +22,26 @@ import { useSettingGajiStore } from "@/store/settingGaji/settingGajiStore";
 import { usePajakStore } from "@/store/pajak/pajakStore";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useTunjanganKehadiranStore } from "@/store/tunjanganKehadiran/tunjanganKehadiranStore";
+import { useToastStore } from "@/store/toastStore";
 
 interface SettingGajiCreateFormProps {
   onSuccess: () => void;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function SettingGajiCreateForm({
   onSuccess,
 }: SettingGajiCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
   const animatedComponents = makeAnimated();
 
@@ -50,15 +62,17 @@ export default function SettingGajiCreateForm({
     (state) => state.fetchTunjanganKehadiran,
   );
 
-  const pajakOptions = pajaks.map((pajak) => ({
+  const pajakOptions: Option[] = pajaks.map((pajak) => ({
     value: pajak.id_pajak,
     label: pajak.nama,
   }));
 
-  const tunjanganKehadiranOptions = tunjanganKehadiran.map((tunjangan) => ({
-    value: tunjangan.id_tunjangan_kehadiran,
-    label: `Rp. ${new Intl.NumberFormat("id-ID").format(tunjangan.nominal)} | ${tunjangan.tahun}`,
-  }));
+  const tunjanganKehadiranOptions: Option[] = tunjanganKehadiran.map(
+    (tunjangan) => ({
+      value: tunjangan.id_tunjangan_kehadiran,
+      label: `Rp. ${new Intl.NumberFormat("id-ID").format(tunjangan.nominal)} | ${tunjangan.tahun}`,
+    }),
+  );
 
   const formSettingGaji = useForm<TypeSettingGajiUpdate>({
     resolver: zodResolver(SettingGajiUpdateSchema),
@@ -81,8 +95,18 @@ export default function SettingGajiCreateForm({
     try {
       await updateSettingGaji(data);
       onSuccess();
+      setToast({
+        isOpen: true,
+        message: "Setting Gaji Berhasil Diupdate",
+        type: "success",
+      });
     } catch (error) {
-      console.error("Error Insert Tunjangan Bonus:", error);
+      setToast({
+        isOpen: true,
+        message: "Setting Gaji Gagal Diupdate",
+        type: "error",
+      });
+      console.error("Error Update Setting Gaji:", error);
     } finally {
       setIsLoading(false);
     }
@@ -92,7 +116,7 @@ export default function SettingGajiCreateForm({
     fetchSettingGaji();
     fetchPajak();
     fetchTunjanganKehadiran();
-  }, [fetchSettingGaji]);
+  }, [fetchPajak, fetchSettingGaji, fetchTunjanganKehadiran]);
 
   return (
     <>

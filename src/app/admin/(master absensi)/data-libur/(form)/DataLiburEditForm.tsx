@@ -17,14 +17,26 @@ import { Button } from "@/components/custom/button";
 import { useDataLiburStore } from "@/store/dataLibur/dataLiburStore";
 import { DataLiburUpdateSchema, TypeDataLiburUpdate } from "./DataLiburSchema";
 import { useKategoriLiburStore } from "@/store/kategoriLibur/kategoriLiburStore";
+import { useToastStore } from "@/store/toastStore";
 
 interface DataLiburUpdateFormProps {
   onSuccess: () => void;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function DataLiburUpdateForm({
   onSuccess,
 }: DataLiburUpdateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const dataLiburData = useDataLiburStore((state) => state.dataLiburData);
@@ -39,12 +51,12 @@ export default function DataLiburUpdateForm({
   const [tanggal, setTanggal] = useState(
     dataLiburData?.tanggal.split("T")[0] || "",
   );
-  const kategoriLiburOptions = kategoriLibur.map((kategoriLibur) => ({
+  const kategoriLiburOptions: Option[] = kategoriLibur.map((kategoriLibur) => ({
     value: kategoriLibur.id_kategori_libur,
     label: kategoriLibur.jenis,
   }));
 
-  const statusAbsenOptions = [
+  const statusAbsenOptions: Option[] = [
     { value: "hadir", label: "Hadir" },
     { value: "tidak_hadir", label: "Tidak Hadir" },
   ];
@@ -72,7 +84,17 @@ export default function DataLiburUpdateForm({
       });
       formDataLibur.reset();
       onSuccess();
+      setToast({
+        isOpen: true,
+        message: "Data Libur Berhasil Diupdate",
+        type: "success",
+      });
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data Libur Gagal Diupdate",
+        type: "error",
+      });
       console.error("Error Update Data Libur:", error);
     } finally {
       setIsLoading(false);

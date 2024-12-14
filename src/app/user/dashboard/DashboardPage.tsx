@@ -294,6 +294,7 @@ const UserDashboardPage = () => {
     getUserIdentity();
     getWaktuAbsen();
     fetchJamKerja();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user.id]);
 
   useEffect(() => {
@@ -311,7 +312,6 @@ const UserDashboardPage = () => {
     <div>
       <div className="mb-5 flex items-center justify-between space-y-2">
         <h1 className="text-2xl font-bold tracking-tight">Dashboard User</h1>
-        <Button onClick={() => setShowModalAlert(true)}>ALERT</Button>
       </div>
 
       <ModalAlert

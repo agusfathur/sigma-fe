@@ -21,12 +21,11 @@ export function AdminNav() {
   const router = useRouter();
   const handleSignOut = async () => {
     try {
-      await signOut({ redirect: false });
       const logout = await axiosJWT.delete(
         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`,
       );
-
-      if (logout.status === 200) {
+      if (logout.data.status === true) {
+        await signOut({ redirect: false });
         router.push("/");
       }
     } catch (error) {
@@ -63,15 +62,15 @@ export function AdminNav() {
             Profile
             <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
           </DropdownMenuItem>
-          {/* <DropdownMenuItem>
-            Billing
+          <DropdownMenuItem onClick={() => router.push("/admin/ubah-password")}>
+            Ubah Password
             <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          {/* <DropdownMenuItem>
             Settings
             <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>New Team</DropdownMenuItem> */}
+          </DropdownMenuItem> */}
+          {/* <DropdownMenuItem>New Team</DropdownMenuItem> */}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>

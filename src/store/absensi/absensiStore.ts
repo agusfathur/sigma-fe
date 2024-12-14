@@ -82,6 +82,7 @@ export const useAbsensiStore = create<AbsensiState>((set, get) => ({
       );
 
       set({ absensi: res.data.data });
+      return res.data.data;
     } catch (error) {
       console.log(error);
     }

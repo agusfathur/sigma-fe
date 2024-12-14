@@ -9,8 +9,16 @@ import { useUserStore } from "@/store/user/userStore";
 import { UserColumns } from "./UserColumns";
 import UserCreateForm from "../(form)/UserCreateForm";
 import UserEditForm from "../(form)/UserEditForm";
+import ModalToast from "@/components/custom/modal-toast";
+import { useToastStore } from "@/store/toastStore";
 
 const PotongGajiTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
 
   const users = useUserStore((state) => state.user);
@@ -31,7 +39,17 @@ const PotongGajiTable = () => {
     try {
       await deleteUser(userData?.id_user as string);
       onSuccess();
+      setToast({
+        isOpen: true,
+        message: "User berhasil dihapus",
+        type: "success",
+      });
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "User gagal dihapus",
+        type: "error",
+      });
       console.log(error);
     }
   };
@@ -53,6 +71,14 @@ const PotongGajiTable = () => {
 
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <div className="space-y-4">
         <DataTable
           data={users}

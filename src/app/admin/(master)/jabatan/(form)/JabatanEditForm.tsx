@@ -14,12 +14,19 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/custom/button";
 import { useJabatanStore } from "@/store/jabatan/jabatanStore";
+import { useToastStore } from "@/store/toastStore";
 
 interface JabatanEditFormProps {
   onSuccess: () => void;
 }
 
 export default function JabatanEditForm({ onSuccess }: JabatanEditFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const jabatanData = useJabatanStore((state) => state.jabatanData);
@@ -38,9 +45,19 @@ export default function JabatanEditForm({ onSuccess }: JabatanEditFormProps) {
     setIsLoading(true);
     try {
       const res = await updateJabatan(data);
+      setToast({
+        isOpen: true,
+        message: "Jabatan berhasil diubah",
+        type: "success",
+      });
       formJabatan.reset();
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Jabatan gagal diubah",
+        type: "error",
+      });
       console.error("Error Insert Jabatan:", error);
     } finally {
       setIsLoading(false);

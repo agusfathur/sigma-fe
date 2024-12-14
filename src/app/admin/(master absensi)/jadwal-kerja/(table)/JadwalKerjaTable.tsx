@@ -11,8 +11,21 @@ import JadwalKerjaCreateForm from "../(form)/JadwalKerjaCreateForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/custom/button";
 import JadwalKerjaPegawaiTable from "../(table pegawai)/JadwalKerjaPegawaiTable";
+import ModalToast from "@/components/custom/modal-toast";
+import { useToastStore } from "@/store/toastStore";
+
+interface Option {
+  value: string;
+  label: string;
+}
 
 const JadwalKerjaTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const fetchJadwalKerjaByFilter = useJadwalKerjaStore(
     (state) => state.fetchJadwalKerjaByFilter,
   );
@@ -64,7 +77,7 @@ const JadwalKerjaTable = () => {
     { value: string; label: string }[]
   >([]);
   const getBulanOption = () => {
-    const options = [
+    const options: Option[] = [
       {
         value: "01",
         label: "Januari",
@@ -197,8 +210,18 @@ const JadwalKerjaTable = () => {
     if (!jadwalKerjaData) return;
     try {
       await deleteJadwalKerja(jadwalKerjaData?.id_jadwal);
+      setToast({
+        isOpen: true,
+        message: "Data jadwal berhasil dihapus",
+        type: "success",
+      });
       await fetchJadwalKerjaByFilter(query);
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data jadwal gagal dihapus",
+        type: "error",
+      });
       console.log(error);
     } finally {
       setIsModalDeleteOpen(false);
@@ -206,6 +229,14 @@ const JadwalKerjaTable = () => {
   };
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <Tabs orientation="vertical" defaultValue="table" className="space-y-4">
         <div className="w-full overflow-x-auto pb-2">
           <TabsList>

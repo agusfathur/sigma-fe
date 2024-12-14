@@ -14,7 +14,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/custom/button";
-import { useStatusKepegawaianStore } from "@/store/statusKepegawaian/statusKepegawaianStore";
 import { useJadwalKerjaStore } from "@/store/jadwalKerja/jadwalKerjaStore";
 import {
   JadwalKerjaUpdateSchema,
@@ -23,17 +22,24 @@ import {
 import { useJamKerjaStore } from "@/store/jamKerja/jamKerjaStore";
 import { Pegawai } from "@/store/pegawai/pegawai.types";
 import { usePegawaiStore } from "@/store/pegawai/pegawaiStore";
+import { useToastStore } from "@/store/toastStore";
 
 interface JadwalKerjaUpdateFormProps {
   onSuccess: () => void;
   pegawaiDataProps?: Pegawai;
 }
 
-export default function StatusPegawaiUpdateForm({
+interface Option {
+  value: string;
+  label: string;
+}
+
+export default function JadwalKerjaUpdateForm({
   onSuccess,
   pegawaiDataProps,
 }: JadwalKerjaUpdateFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { setToast } = useToastStore();
 
   const jadwalKerjaData = useJadwalKerjaStore((state) => state.jadwalKerjaData);
 
@@ -57,7 +63,7 @@ export default function StatusPegawaiUpdateForm({
   const jamKerja = useJamKerjaStore((state) => state.jamKerja);
   const fetchJamKerja = useJamKerjaStore((state) => state.fetchJamKerja);
 
-  const jamKerjaOptions = jamKerja.map((jamKerja) => ({
+  const jamKerjaOptions: Option[] = jamKerja.map((jamKerja) => ({
     value: jamKerja.id_shift_kerja,
     label: `${jamKerja.waktu_masuk}-${jamKerja.waktu_pulang} | ${jamKerja.keterangan}`,
   }));
@@ -82,13 +88,23 @@ export default function StatusPegawaiUpdateForm({
     try {
       const res = await updateJadwalKerja({
         id_jadwal: data.id_jadwal,
-        pegawai_id: jadwalKerjaData?.pegawai_id,
+        pegawai_id: jadwalKerjaData?.pegawai_id || "",
         shift_id: data.shift_id,
         tanggal: tanggal + "T00:00:00.000Z",
       });
       formJadwalKerja.reset();
+      setToast({
+        type: "success",
+        message: "Data Jadwal Kerja Berhasil Diupdate",
+        isOpen: true,
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        type: "error",
+        message: "Data Jadwal Kerja Gagal Diupdate",
+        isOpen: true,
+      });
       console.error("Error Update Status Pegawai:", error);
     } finally {
       setIsLoading(false);
@@ -149,7 +165,7 @@ export default function StatusPegawaiUpdateForm({
                     }
                     value={
                       jamKerjaOptions.find(
-                        (option: any) =>
+                        (option: Option) =>
                           String(option.value) === String(field.value),
                       ) || null
                     }

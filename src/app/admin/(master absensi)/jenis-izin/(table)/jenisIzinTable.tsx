@@ -8,8 +8,16 @@ import StatusPegawaiUpdateForm from "../(form)/jenisIzinEditForm";
 import { jenisIzinColumns } from "./jenisIzinColumns";
 import { useJenisIzinStore } from "@/store/jenisIzin/jenisIzinStore";
 import JenisIzinCreateForm from "../(form)/jenisIzinCreateForm";
+import { useToastStore } from "@/store/toastStore";
+import ModalToast from "@/components/custom/modal-toast";
 
 const JenisIzinTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const fetchJenisIzin = useJenisIzinStore((state) => state.fetchJenisIzin);
   const jenisIzins = useJenisIzinStore((state) => state.jenisIzin);
 
@@ -49,8 +57,18 @@ const JenisIzinTable = () => {
     if (!jenisIzinData) return;
     try {
       deleteJenisIzin(jenisIzinData?.id_jenis_izin);
+      setToast({
+        isOpen: true,
+        message: "Data jenis izin berhasil dihapus",
+        type: "success",
+      });
       fetchJenisIzin();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data jenis izin gagal dihapus",
+        type: "error",
+      });
       console.log(error);
     } finally {
       setIsModalDeleteOpen(false);
@@ -58,6 +76,15 @@ const JenisIzinTable = () => {
   };
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
+
       <DataTable
         data={jenisIzins}
         columns={jenisIzinColumns}

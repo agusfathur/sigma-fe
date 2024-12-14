@@ -19,12 +19,19 @@ import {
   TypePajakCreate,
   TypePajakUpdate,
 } from "./PajakSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface PajakEditFormProps {
   onSuccess: () => void;
 }
 
 export default function PajakEditForm({ onSuccess }: PajakEditFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const updatePajak = usePajakStore((state) => state.updatePajak);
@@ -47,9 +54,19 @@ export default function PajakEditForm({ onSuccess }: PajakEditFormProps) {
         persen: Number(data.persen),
       });
       formPajak.reset();
+      setToast({
+        isOpen: true,
+        message: "Data pajak berhasil diupdate",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
-      console.error("Error Insert THR:", error);
+      setToast({
+        isOpen: true,
+        message: "Data pajak gagal diupdate",
+        type: "error",
+      });
+      console.error("Error Insert Pajak:", error);
     } finally {
       setIsLoading(false);
     }

@@ -4,15 +4,23 @@ import { DataTable } from "@/components/table/data-table";
 import { useEffect, useState } from "react";
 import Modal from "@/components/custom/modal";
 import ModalDelete from "@/components/custom/modal-delete";
-import StatusPegawaiUpdateForm from "../../(form)/JadwalKerjaEditForm";
 import { jadwalKerjaColumns } from "../../(table)/JadwalKerjaColumns";
 import { useJadwalKerjaStore } from "@/store/jadwalKerja/jadwalKerjaStore";
 import JadwalKerjaCreateForm from "../../(form)/JadwalKerjaCreateForm";
 import { Button } from "@/components/custom/button";
 import { useParams, useRouter } from "next/navigation";
 import { usePegawaiStore } from "@/store/pegawai/pegawaiStore";
+import JadwalKerjaUpdateForm from "../../(form)/JadwalKerjaEditForm";
+import { useToastStore } from "@/store/toastStore";
+import ModalToast from "@/components/custom/modal-toast";
 
 const JadwalKerjaTable = () => {
+  const {
+    setToast,
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+  } = useToastStore();
   const { id: pegawaiId }: { id: string } = useParams();
   const router = useRouter();
 
@@ -202,8 +210,18 @@ const JadwalKerjaTable = () => {
     if (!jadwalKerjaData) return;
     try {
       await deleteJadwalKerja(jadwalKerjaData?.id_jadwal);
+      setToast({
+        isOpen: true,
+        message: "Data jadwal berhasil dihapus",
+        type: "success",
+      });
       await fetchJadwalKerjaPegawaiByFilter(query, pegawaiId);
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data jadwal gagal dihapus",
+        type: "error",
+      });
       console.log(error);
     } finally {
       setIsModalDeleteOpen(false);
@@ -221,6 +239,14 @@ const JadwalKerjaTable = () => {
         </h1>
       </div>
       <>
+        <ModalToast
+          isOpen={toastOpen}
+          message={message}
+          type={toastType}
+          onClose={() =>
+            setToast({ isOpen: false, message: "", type: toastType })
+          }
+        />
         {/* filter */}
         <Modal
           isOpen={isModalFilterOpen}
@@ -314,7 +340,7 @@ const JadwalKerjaTable = () => {
         textHeader="Edit Jadwal Kerja"
         onClose={() => setIsModalEditOpen(false)}
       >
-        <StatusPegawaiUpdateForm
+        <JadwalKerjaUpdateForm
           pegawaiDataProps={pegawaiData}
           onSuccess={onSuccess}
         />

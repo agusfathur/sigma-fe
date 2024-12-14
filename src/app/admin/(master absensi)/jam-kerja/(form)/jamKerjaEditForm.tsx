@@ -15,14 +15,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/custom/button";
 import { useJamKerjaStore } from "@/store/jamKerja/jamKerjaStore";
 import { JamKerjaUpdateSchema, TypeJamKerjaUpdate } from "./jamKerjaSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface JamKerjaUpdateFormProps {
   onSuccess: () => void;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function JamKerjaUpdateForm({
   onSuccess,
 }: JamKerjaUpdateFormProps) {
+  const { setToast } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
   const jamKerjaData = useJamKerjaStore((state) => state.jamKerjaData);
 
@@ -48,7 +55,7 @@ export default function JamKerjaUpdateForm({
     },
   });
 
-  const categoryOptions: any = [
+  const categoryOptions: Option[] = [
     {
       value: "masa_mbkm",
       label: "Masa MBKM",
@@ -85,8 +92,18 @@ export default function JamKerjaUpdateForm({
     try {
       const res = await updateJamKerja(data);
       formJamKerja.reset();
+      setToast({
+        isOpen: true,
+        message: "Data Jam Kerja berhasil diubah",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data Jam Kerja gagal diubah",
+        type: "error",
+      });
       console.error("Error Update Status Pegawai:", error);
     } finally {
       setIsLoading(false);
@@ -130,7 +147,7 @@ export default function JamKerjaUpdateForm({
                     }
                     value={
                       categoryOptions.find(
-                        (option: any) =>
+                        (option: Option) =>
                           String(option.value) === String(field.value),
                       ) || null
                     }

@@ -14,6 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/custom/button";
 import { useJabatanStore } from "@/store/jabatan/jabatanStore";
 import { JabatanCreateSchema, TypeJabatanCreate } from "./JabatanSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface JabatanCreateFormProps {
   onSuccess: () => void;
@@ -22,6 +23,12 @@ interface JabatanCreateFormProps {
 export default function JabatanCreateForm({
   onSuccess,
 }: JabatanCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const insertJabatan = useJabatanStore((state) => state.insertJabatan);
@@ -39,8 +46,18 @@ export default function JabatanCreateForm({
     try {
       const res = await insertJabatan(data);
       formJabatan.reset();
+      setToast({
+        isOpen: true,
+        message: "Jabatan berhasil ditambahkan",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Jabatan gagal ditambahkan",
+        type: "error",
+      });
       console.error("Error Insert Jabatan:", error);
     } finally {
       setIsLoading(false);

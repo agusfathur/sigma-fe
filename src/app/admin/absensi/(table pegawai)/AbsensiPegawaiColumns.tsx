@@ -29,6 +29,7 @@ export const absensiPegawaiColumns: ColumnDef<Pegawai>[] = [
         width={80}
         height={80}
         alt="image pegawai"
+        className="rounded"
       />
     ),
   },

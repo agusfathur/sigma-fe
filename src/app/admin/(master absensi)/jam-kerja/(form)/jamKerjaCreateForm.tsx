@@ -15,14 +15,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/custom/button";
 import { useJamKerjaStore } from "@/store/jamKerja/jamKerjaStore";
 import { JamKerjaCreateSchema, TypeJamKerjaCreate } from "./jamKerjaSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface JamKerjaCreateFormProps {
   onSuccess: () => void;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function JamKerjaCreateForm({
   onSuccess,
 }: JamKerjaCreateFormProps) {
+  const { setToast } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
   const [waktuMasuk, setWaktuMasuk] = useState("");
   const [waktuPulang, setWaktuPulang] = useState("");
@@ -40,7 +47,7 @@ export default function JamKerjaCreateForm({
     },
   });
 
-  const categoryOptions: any = [
+  const categoryOptions: Option[] = [
     {
       value: "masa_mbkm",
       label: "Masa MBKM",
@@ -83,8 +90,18 @@ export default function JamKerjaCreateForm({
         keterangan: data.keterangan,
       });
       formJamKerja.reset();
+      setToast({
+        isOpen: true,
+        message: "Data Jam Kerja berhasil ditambahkan",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data Jam Kerja gagal ditambahkan",
+        type: "error",
+      });
       console.error("Error Insert Jabatan:", error);
     } finally {
       setIsLoading(false);
@@ -128,7 +145,7 @@ export default function JamKerjaCreateForm({
                     }
                     value={
                       categoryOptions.find(
-                        (option: any) =>
+                        (option: Option) =>
                           String(option.value) === String(field.value),
                       ) || null
                     }

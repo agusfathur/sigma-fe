@@ -3,8 +3,16 @@ import { useEffect } from "react";
 import ContentSection from "../(components)/content-section";
 import { useDataSekolahStore } from "@/store/dataSekolah/dataSekolahStore";
 import SekolahForm from "./SekolahForm";
+import ModalToast from "@/components/custom/modal-toast";
+import { useToastStore } from "@/store/toastStore";
 
 const DataSekolahPage = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const onSuccess = async () => {
     await fetchDataSekolah();
   };
@@ -19,7 +27,17 @@ const DataSekolahPage = () => {
   }, [fetchDataSekolah]);
   return (
     <ContentSection title="Setting App" desc="Setting App">
-      <SekolahForm onSuccess={onSuccess} dataSekolah={dataSekolah} />
+      <>
+        <SekolahForm onSuccess={onSuccess} dataSekolah={dataSekolah} />
+        <ModalToast
+          isOpen={toastOpen}
+          message={message}
+          type={toastType}
+          onClose={() =>
+            setToast({ isOpen: false, message: "", type: toastType })
+          }
+        />
+      </>
     </ContentSection>
   );
 };

@@ -39,7 +39,7 @@ const authOptions: NextAuthOptions = {
               maxAge: 60 * 60 * 24,
               httpOnly: true,
             });
-            console.log((await cookies()).get("refreshToken"));
+            // console.log((await cookies()).get("refreshToken"));
             if (user) {
               return user;
             }

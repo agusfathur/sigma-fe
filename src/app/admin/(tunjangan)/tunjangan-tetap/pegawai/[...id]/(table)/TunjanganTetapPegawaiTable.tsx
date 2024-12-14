@@ -9,8 +9,16 @@ import { useTunjanganTetapPegawaiStore } from "@/store/tunjanganTetap/tunjanganT
 import { TunjanganTetapPegawaiColumns } from "./TunjangaTetapPegawaiColumns";
 import TunjangaTetapPegawaiCreateForm from "../(form)/TunjangaTetapPegawaiCreateForm";
 import TunjangaTetapPegawaiEditForm from "../(form)/TunjangaTetapPegawaiEditForm";
+import { useToastStore } from "@/store/toastStore";
+import ModalToast from "@/components/custom/modal-toast";
 
 const TunjanganTetapPegawaiTable = ({ pegawaiId }: { pegawaiId: string }) => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
 
   const tunjanganTetapPegawais = useTunjanganTetapPegawaiStore(
@@ -49,7 +57,17 @@ const TunjanganTetapPegawaiTable = ({ pegawaiId }: { pegawaiId: string }) => {
         tunjanganTetapPegawaiData?.id_tunjangan_tetap_pegawai as string,
       );
       onSuccess();
+      setToast({
+        isOpen: true,
+        message: "Data Tunjangan Tetap Pegawai Berhasil Dihapus",
+        type: "success",
+      });
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data Tunjangan Tetap Pegawai Gagal Dihapus",
+        type: "error",
+      });
       console.log(error);
     }
   };
@@ -72,6 +90,14 @@ const TunjanganTetapPegawaiTable = ({ pegawaiId }: { pegawaiId: string }) => {
 
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <div className="space-y-4">
         <DataTable
           data={tunjanganTetapPegawais}
@@ -86,7 +112,7 @@ const TunjanganTetapPegawaiTable = ({ pegawaiId }: { pegawaiId: string }) => {
         {/* create */}
         <Modal
           isOpen={isModalCreateOpen}
-          textHeader="Create Tunjangan Kehadiran"
+          textHeader="Create Tunjangan Tetap Pegawai"
           widthScreenSize="lg"
           onClose={() => setIsModalCreateOpen(false)}
         >
@@ -99,7 +125,7 @@ const TunjanganTetapPegawaiTable = ({ pegawaiId }: { pegawaiId: string }) => {
         {/* edit */}
         <Modal
           isOpen={isModalEditOpen}
-          textHeader="Create Tunjangan Kehadiran"
+          textHeader="Create Tunjangan Tetap Pegawai"
           widthScreenSize="lg"
           onClose={() => setIsModalEditOpen(false)}
         >
@@ -114,7 +140,7 @@ const TunjanganTetapPegawaiTable = ({ pegawaiId }: { pegawaiId: string }) => {
           onClose={() => setIsModalDeleteOpen(false)}
         >
           <ModalDelete
-            textHeader="Kamu Yakin Menghapus Tunjangan Kehadiran Ini?"
+            textHeader="Kamu Yakin Menghapus Tunjangan Tetap Pegawai Ini?"
             handleDelete={handleDelete}
             setIsModalDeleteOpen={setIsModalDeleteOpen}
           />

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -11,10 +12,22 @@ import { useSession } from "next-auth/react";
 import PinjamanCreateForm from "../(form)/PinjamanCreateForm";
 import ModalDelete from "@/components/custom/modal-delete";
 import PinjamanEditForm from "../(form)/PinjamanEditForm";
+import { useToastStore } from "@/store/toastStore";
+import ModalToast from "@/components/custom/modal-toast";
+
+interface Option {
+  value: string;
+  label: string;
+}
 
 const UserPinjamanTable = () => {
   const { data: session } = useSession();
-
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
 
   const pinjamans = usePinjamanStore((state) => state.pinjaman);
@@ -55,14 +68,10 @@ const UserPinjamanTable = () => {
   );
 
   const [query, setQuery] = useState("");
-  const [tahunOptions, setTahunOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
-  const [bulanOptions, setBulanOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
+  const [tahunOptions, setTahunOptions] = useState<Option[]>([]);
+  const [bulanOptions, setBulanOptions] = useState<Option[]>([]);
   const getBulanOption = () => {
-    const options = [
+    const options: Option[] = [
       {
         value: "01",
         label: "Januari",
@@ -181,7 +190,17 @@ const UserPinjamanTable = () => {
     try {
       await deletePinjaman(pinjamanData?.id_pinjaman as string);
       onSuccess();
+      setToast({
+        isOpen: true,
+        type: "success",
+        message: "Pinjaman berhasil dihapus",
+      });
     } catch (error) {
+      setToast({
+        isOpen: true,
+        type: "error",
+        message: "Pinjaman gagal dihapus",
+      });
       console.log(error);
     }
   };
@@ -205,6 +224,14 @@ const UserPinjamanTable = () => {
 
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <div className="space-y-4">
         <h3>
           Filter : <span>{textFilter}</span>

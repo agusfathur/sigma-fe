@@ -9,8 +9,16 @@ import { usePotongGajiStore } from "@/store/potongGaji/potongGajiStore";
 import { PotongGajiColumns } from "./PotongGajiColumns";
 import PotongGajiCreateForm from "../(form)/PotongGajiCreateForm";
 import PotongGajiEditForm from "../(form)/PotongGajiEditForm";
+import ModalToast from "@/components/custom/modal-toast";
+import { useToastStore } from "@/store/toastStore";
 
 const PotongGajiTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
 
   const potongGajis = usePotongGajiStore((state) => state.potongGaji);
@@ -36,8 +44,18 @@ const PotongGajiTable = () => {
   const handleDelete = async () => {
     try {
       await deletePotongGaji(potongGajiData?.id_potong_gaji as string);
+      setToast({
+        isOpen: true,
+        message: "Data potong gaji berhasil dihapus",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data potong gaji gagal dihapus",
+        type: "error",
+      });
       console.log(error);
     }
   };
@@ -59,6 +77,14 @@ const PotongGajiTable = () => {
 
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <div className="space-y-4">
         <DataTable
           data={potongGajis}

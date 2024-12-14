@@ -18,12 +18,24 @@ import { usePegawaiStore } from "@/store/pegawai/pegawaiStore";
 import { useTHRStore } from "@/store/THR/THRStore";
 import { THRCreateSchema, TypeTHRCreate } from "./THRSchema";
 import { number } from "zod";
+import { useToastStore } from "@/store/toastStore";
 
 interface THRCreateFormProps {
   onSuccess: () => void;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function THRCreateForm({ onSuccess }: THRCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const insertTHR = useTHRStore((state) => state.insertTHR);
@@ -31,12 +43,12 @@ export default function THRCreateForm({ onSuccess }: THRCreateFormProps) {
   const pegawais = usePegawaiStore((state) => state.pegawai);
   const fetchPegawai = usePegawaiStore((state) => state.fetchPegawai);
 
-  const pegawaiOptions = pegawais.map((pegawai) => ({
+  const pegawaiOptions: Option[] = pegawais.map((pegawai) => ({
     value: pegawai.id_pegawai,
     label: pegawai.nama,
   }));
 
-  const metodePembayaranOptions = [
+  const metodePembayaranOptions: Option[] = [
     {
       value: "cash",
       label: "Cash",
@@ -79,8 +91,18 @@ export default function THRCreateForm({ onSuccess }: THRCreateFormProps) {
         tanggal_pembayaran: data.tanggal_pembayaran + "T00:00:00.000Z",
       });
       formTHR.reset();
+      setToast({
+        isOpen: true,
+        message: "Data THR berhasil ditambahkan",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data THR gagal ditambahkan",
+        type: "error",
+      });
       console.error("Error Insert THR:", error);
     } finally {
       setIsLoading(false);
@@ -128,7 +150,7 @@ export default function THRCreateForm({ onSuccess }: THRCreateFormProps) {
                     }
                     value={
                       tahunOptions.find(
-                        (option: any) =>
+                        (option: { value: number; label: string }) =>
                           Number(option.value) === Number(field.value),
                       ) || null
                     }
@@ -175,7 +197,7 @@ export default function THRCreateForm({ onSuccess }: THRCreateFormProps) {
                     }
                     value={
                       pegawaiOptions.find(
-                        (option: any) =>
+                        (option: Option) =>
                           String(option.value) === String(field.value),
                       ) || null
                     }

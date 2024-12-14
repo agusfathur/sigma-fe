@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { DataTable } from "@/components/table/data-table";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Modal from "@/components/custom/modal";
 import { Button } from "@/components/custom/button";
 import { permohonanIzinColumns } from "./IzinColumns";
@@ -11,53 +12,52 @@ import { useSession } from "next-auth/react";
 import IzinCreateForm from "../(form)/IzinCreateForm";
 import ModalDelete from "@/components/custom/modal-delete";
 import Image from "next/image";
+import { useToastStore } from "@/store/toastStore";
+import ModalToast from "@/components/custom/modal-toast";
+import axiosJWT from "@/lib/authJWT";
+import { PermohonanIzin } from "@/store/permohonanIzin/permohonanIzin.types";
+import { useJadwalKerjaStore } from "@/store/jadwalKerja/jadwalKerjaStore";
+import { useAbsensiStore } from "@/store/absensi/absensiStore";
+import { Absensi } from "@/store/absensi/absensi.types";
+import { JadwalKerja } from "@/store/jadwalKerja/jadwalKerja.types";
+
+interface Option {
+  value: string;
+  label: string;
+}
 
 const IzinTable = () => {
   const { data: session } = useSession();
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
-  const permpohonanIzins = usePermohonanIzinStore(
-    (state) => state.permohonanIzin,
-  );
+  const [sumIzin, setSumIzin] = useState({
+    tidak_hadir: 0,
+    cuti: 0,
+  });
+  const {
+    permohonanIzin: permpohonanIzins,
+    fetchPermohonanIzinByUserFilter,
+    fetchPermohonanIzinByTahun,
+    deletePermohonanIzin: deleteIzin,
+    isModalFilterOpen,
+    setIsModalFilterOpen,
+    isModalDeleteOpen,
+    setIsModalDeleteOpen,
+    isModalDetailOpen,
+    setIsModalDetailOpen,
+    permohonanIzinData,
+  } = usePermohonanIzinStore();
 
-  const fetchPermohonanIzinByUserFilter = usePermohonanIzinStore(
-    (state) => state.fetchPermohonanIzinByUserFilter,
-  );
+  const { fetchJadwalKerjaPegawaiByUserFilter } = useJadwalKerjaStore();
+  const { fetchAllAbsensiByUserFilter } = useAbsensiStore();
 
-  const deleteIzin = usePermohonanIzinStore(
-    (state) => state.deletePermohonanIzin,
-  );
-
-  const isModalFilterOpen = usePermohonanIzinStore(
-    (state) => state.isModalFilterOpen,
-  );
-  const setIsModalFilterOpen = usePermohonanIzinStore(
-    (state) => state.setIsModalFilterOpen,
-  );
-
-  const isModalDeleteOpen = usePermohonanIzinStore(
-    (state) => state.isModalDeleteOpen,
-  );
-  const setIsModalDeleteOpen = usePermohonanIzinStore(
-    (state) => state.setIsModalDeleteOpen,
-  );
-
-  const isModalDetailOpen = usePermohonanIzinStore(
-    (state) => state.isModalDetailOpen,
-  );
-  const setIsModalDetailOpen = usePermohonanIzinStore(
-    (state) => state.setIsModalDetailOpen,
-  );
-
-  const permohonanIzinData = usePermohonanIzinStore(
-    (state) => state.permohonanIzinData,
-  );
-
-  const [tahunOptions, setTahunOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
-  const [bulanOptions, setBulanOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
+  const [tahunOptions, setTahunOptions] = useState<Option[]>([]);
+  const [bulanOptions, setBulanOptions] = useState<Option[]>([]);
 
   const [filterTahun, setFilterTahun] = useState("");
   const [filterBulan, setFilterBulan] = useState("");
@@ -75,7 +75,11 @@ const IzinTable = () => {
   };
 
   const getBulanOption = () => {
-    const options = [
+    const options: Option[] = [
+      {
+        value: "",
+        label: "Semua",
+      },
       {
         value: "01",
         label: "Januari",
@@ -148,12 +152,9 @@ const IzinTable = () => {
     return months[monthNumber - 1]; // monthNumber dimulai dari 1, jadi kurangi 1 untuk akses array
   };
 
-  const date = new Date();
-  const [query, setQuery] = useState(
-    `bulan=${date.getMonth() + 1}&tahun=${date.getFullYear()}`,
-  );
-  const [textFilter, setTextFilter] = useState(`
-    ${getMonthName(date.getMonth() + 1)} ${date.getFullYear()}`);
+  const date = useMemo(() => new Date(), []);
+  const [query, setQuery] = useState(`tahun=${date.getFullYear()}`);
+  const [textFilter, setTextFilter] = useState(`Tahun ${date.getFullYear()}`);
 
   const buildDateFilter = (
     filterTanggal: string,
@@ -164,14 +165,19 @@ const IzinTable = () => {
     const currentYear = today.getFullYear();
 
     if (filterTanggal) {
+      console.log("masuk tgl");
       setTextFilter(`Tanggal ${filterTanggal}`);
       return `tanggal=${filterTanggal}`;
     } else if (filterBulan && filterTahun) {
       setTextFilter(`${getMonthName(parseInt(filterBulan))} ${filterTahun}`);
       return `bulan=${filterBulan}&tahun=${filterTahun}`; // Bulan dan tahun
     } else if (filterBulan) {
+      console.log("masuk bulan");
       setTextFilter(`${getMonthName(parseInt(filterBulan))} ${currentYear}`);
       return `bulan=${filterBulan}&tahun=${currentYear}`; // Bulan dengan tahun saat ini
+    } else if (filterTahun && filterBulan === "") {
+      setTextFilter(`Tahun ${filterTahun}`);
+      return `tahun=${filterTahun}`;
     }
     return "";
   };
@@ -187,12 +193,77 @@ const IzinTable = () => {
     try {
       await deleteIzin(permohonanIzinData?.id_permohonan_izin as string);
       await fetchPermohonanIzinByUserFilter(session?.user.id as string, query);
+      setToast({
+        isOpen: true,
+        type: "success",
+        message: "Izin Cuti berhasil dihapus",
+      });
     } catch (error) {
+      setToast({
+        isOpen: true,
+        type: "error",
+        message: "Izin Cuti gagal dihapus",
+      });
       console.log(error);
     } finally {
       await onSuccess();
     }
   };
+
+  const getSumIzin = useCallback(async () => {
+    const tanggalHariIni = new Date()
+      .toLocaleDateString("id-ID")
+      .split("/")
+      .map((part) => part.padStart(2, "0"))
+      .reverse()
+      .join("-");
+    try {
+      const getIzins =
+        (await fetchPermohonanIzinByTahun(
+          date.getFullYear().toString(),
+          session?.user.id as string,
+        )) || [];
+      const getJadwal =
+        (await fetchJadwalKerjaPegawaiByUserFilter(
+          session?.user.id as string,
+          `tahun=${date.getFullYear()}`,
+        )) || [];
+
+      const getAbsensi =
+        (await fetchAllAbsensiByUserFilter(
+          session?.user.id as string,
+          `tahun=${date.getFullYear()}`,
+        )) || [];
+
+      const filterIzinDiterima = getIzins.filter(
+        (izin: PermohonanIzin) => izin.status === "diterima",
+      );
+      const filterJadwal = getJadwal.filter((jadwal: JadwalKerja) => {
+        const jadwalTanggal = new Date(jadwal.tanggal); // Konversi tanggal jadwal ke objek Date
+        const hariIni = new Date(tanggalHariIni); // Konversi tanggal hari ini ke objek Date
+        return jadwalTanggal <= hariIni; // Bandingkan dua objek Date
+      });
+
+      const filterAbsensiMasuk = getAbsensi.filter(
+        (absensi: Absensi) =>
+          absensi.status_absen === "hadir" ||
+          absensi.status_absen === "terlambat",
+      );
+
+      setSumIzin({
+        cuti: filterIzinDiterima.length,
+        tidak_hadir: filterJadwal.length - filterAbsensiMasuk.length,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }, [
+    date,
+    fetchPermohonanIzinByTahun,
+    session?.user.id,
+    fetchJadwalKerjaPegawaiByUserFilter,
+    fetchAllAbsensiByUserFilter,
+  ]);
 
   const onSuccess = async () => {
     if (isModalCreateOpen) {
@@ -206,9 +277,11 @@ const IzinTable = () => {
   useEffect(() => {
     getTahunOption();
     getBulanOption();
+    getSumIzin();
     fetchPermohonanIzinByUserFilter(session?.user.id as string, query);
   }, [
     fetchPermohonanIzinByUserFilter,
+    getSumIzin,
     query,
     permohonanIzinData,
     session?.user?.id,
@@ -216,10 +289,28 @@ const IzinTable = () => {
 
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <div className="space-y-4">
         <h3>
           Filter : <span>{textFilter}</span>
         </h3>
+        <div className="flex items-center space-x-1 md:space-x-2">
+          <h4 className="text-sm font-bold">Total {date.getFullYear()}</h4>
+          <p className="rounded-xl bg-red-100 px-2.5 py-1 text-sm font-medium text-red-950">
+            Tidak Hadir :{" "}
+            <span className="font-bold">{sumIzin.tidak_hadir}</span>
+          </p>
+          <p className="rounded-xl bg-cyan-100 px-2.5 py-1 text-sm font-medium text-cyan-950">
+            Cuti : <span className="font-bold">{sumIzin.cuti}</span>
+          </p>
+        </div>
         <DataTable
           data={permpohonanIzins || []}
           columns={permohonanIzinColumns}
@@ -285,11 +376,11 @@ const IzinTable = () => {
         {/* filter */}
         <Modal
           isOpen={isModalFilterOpen}
-          textHeader="Filter Absensi"
+          textHeader="Filter Izin Cuti"
           widthScreenSize="lg"
           onClose={() => setIsModalFilterOpen(false)}
         >
-          <div>
+          <div className="space-y-2">
             <h2 className="mb-2 text-sm md:text-base">Tanggal</h2>
             <input
               type="date"
@@ -297,7 +388,7 @@ const IzinTable = () => {
               onChange={(e) => setFilterTanggal(e.target.value)}
               value={filterTanggal}
             />
-            <h2 className="mb-2 text-sm md:text-base">Tahun</h2>
+            <h2 className="mb-2 text-sm md:text-base">Bulan</h2>
             <select
               value={filterBulan}
               onChange={(e) => setFilterBulan(e.target.value)}

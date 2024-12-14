@@ -17,12 +17,29 @@ import { Button } from "@/components/custom/button";
 import { THRUpdateSchema, TypeTHRUpdate } from "./THRSchema";
 import { useTHRStore } from "@/store/THR/THRStore";
 import { usePegawaiStore } from "@/store/pegawai/pegawaiStore";
+import { useToastStore } from "@/store/toastStore";
 
 interface THREditFormProps {
   onSuccess: () => void;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface OptionNumber {
+  value: number;
+  label: string;
+}
+
 export default function THREditForm({ onSuccess }: THREditFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const thrData = useTHRStore((state) => state.THRData);
@@ -31,12 +48,12 @@ export default function THREditForm({ onSuccess }: THREditFormProps) {
   const pegawais = usePegawaiStore((state) => state.pegawai);
   const fetchPegawai = usePegawaiStore((state) => state.fetchPegawai);
 
-  const pegawaiOptions = pegawais.map((pegawai) => ({
+  const pegawaiOptions: Option[] = pegawais.map((pegawai) => ({
     value: pegawai.id_pegawai,
     label: pegawai.nama,
   }));
 
-  const metodePembayaranOptions = [
+  const metodePembayaranOptions: Option[] = [
     {
       value: "cash",
       label: "Cash",
@@ -47,9 +64,7 @@ export default function THREditForm({ onSuccess }: THREditFormProps) {
     },
   ];
 
-  const [tahunOptions, setTahunOptions] = useState<
-    { value: number; label: string }[]
-  >([]);
+  const [tahunOptions, setTahunOptions] = useState<OptionNumber[]>([]);
 
   const getTahunOption = () => {
     const tahun = new Date().getFullYear(); // Mendapatkan tahun saat ini
@@ -83,9 +98,19 @@ export default function THREditForm({ onSuccess }: THREditFormProps) {
         tanggal_pembayaran: data.tanggal_pembayaran + "T00:00:00.000Z",
       });
       formTHR.reset();
+      setToast({
+        isOpen: true,
+        message: "Data THR berhasil diubah",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
-      console.error("Error Insert Jabatan:", error);
+      setToast({
+        isOpen: true,
+        message: "Data THR gagal diubah",
+        type: "error",
+      });
+      console.error("Error Insert THR:", error);
     } finally {
       setIsLoading(false);
     }
@@ -132,7 +157,7 @@ export default function THREditForm({ onSuccess }: THREditFormProps) {
                     }
                     value={
                       tahunOptions.find(
-                        (option: any) =>
+                        (option: OptionNumber) =>
                           Number(option.value) === Number(field.value),
                       ) || null
                     }
@@ -180,7 +205,7 @@ export default function THREditForm({ onSuccess }: THREditFormProps) {
                     }
                     value={
                       pegawaiOptions.find(
-                        (option: any) =>
+                        (option: Option) =>
                           String(option.value) === String(field.value),
                       ) || null
                     }

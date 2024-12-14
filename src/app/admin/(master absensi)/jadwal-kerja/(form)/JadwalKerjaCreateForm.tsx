@@ -23,16 +23,28 @@ import { useJamKerjaStore } from "@/store/jamKerja/jamKerjaStore";
 import { usePegawaiStore } from "@/store/pegawai/pegawaiStore";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Pegawai } from "@/store/pegawai/pegawai.types";
+import { useToastStore } from "@/store/toastStore";
 
 interface JadwalKerjaCreateFormProps {
   onSuccess: () => void;
   pegawaiDataProps?: Pegawai;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function JadwalKerjaCreateForm({
   onSuccess,
   pegawaiDataProps,
 }: JadwalKerjaCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
   const [tanggalSenin, setTanggalSenin] = useState("");
   const [tanggalSelasa, setTanggalSelasa] = useState("");
@@ -46,7 +58,7 @@ export default function JadwalKerjaCreateForm({
   const pegawais = usePegawaiStore((state) => state.pegawai);
   const fetchJamKerja = useJamKerjaStore((state) => state.fetchJamKerja);
   const jamKerja = useJamKerjaStore((state) => state.jamKerja);
-  let pegawaiOptions;
+  let pegawaiOptions: Option[];
 
   if (pegawaiDataProps) {
     pegawaiOptions = [
@@ -61,7 +73,7 @@ export default function JadwalKerjaCreateForm({
       label: pegawai.nama,
     }));
   }
-  const jamKerjaOptions = jamKerja.map((jamKerja) => ({
+  const jamKerjaOptions: Option[] = jamKerja.map((jamKerja) => ({
     value: jamKerja.id_shift_kerja,
     label: `${jamKerja.waktu_masuk}-${jamKerja.waktu_pulang} | ${jamKerja.keterangan}`,
   }));
@@ -147,8 +159,18 @@ export default function JadwalKerjaCreateForm({
         }
       }
       formJadwalKerja.reset();
+      setToast({
+        isOpen: true,
+        message: "Jadwal Kerja Berhasil Ditambahkan",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Jadwal Kerja Gagal Ditambahkan",
+        type: "error",
+      });
       console.error("Error Insert Jadwal Kerja:", error);
     } finally {
       setIsLoading(false);

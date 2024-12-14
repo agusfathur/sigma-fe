@@ -20,14 +20,26 @@ import {
   TypeTunjanganBonusCreate,
 } from "./TunjanganBonusSchema";
 import { useTunjanganBonusStore } from "@/store/tunjanganBonus/tunjanganBonusStore";
+import { useToastStore } from "@/store/toastStore";
 
 interface TunjanganTetapCreateFormProps {
   onSuccess: () => void;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function TunjanganTetapCreateForm({
   onSuccess,
 }: TunjanganTetapCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const insertTunjanganBonus = useTunjanganBonusStore(
@@ -37,7 +49,7 @@ export default function TunjanganTetapCreateForm({
   const pegawais = usePegawaiStore((state) => state.pegawai);
   const fetchPegawai = usePegawaiStore((state) => state.fetchPegawai);
 
-  const pegawaiOptions = pegawais.map((pegawai) => ({
+  const pegawaiOptions: Option[] = pegawais.map((pegawai) => ({
     value: pegawai.id_pegawai,
     label: pegawai.nama,
   }));
@@ -60,8 +72,18 @@ export default function TunjanganTetapCreateForm({
         tanggal: data.tanggal + "T00:00:00.000Z",
       });
       formTunjanganBonus.reset();
+      setToast({
+        isOpen: true,
+        message: "Tunjangan Bonus Berhasil Ditambahkan",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Tunjangan Bonus Gagal Ditambahkan",
+        type: "error",
+      });
       console.error("Error Insert Tunjangan Bonus:", error);
     } finally {
       setIsLoading(false);
@@ -111,7 +133,7 @@ export default function TunjanganTetapCreateForm({
                     }
                     value={
                       pegawaiOptions.find(
-                        (option: any) =>
+                        (option: Option) =>
                           String(option.value) === String(field.value),
                       ) || null
                     }

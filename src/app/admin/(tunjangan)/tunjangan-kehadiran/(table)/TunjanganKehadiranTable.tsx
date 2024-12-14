@@ -9,8 +9,16 @@ import { useTunjanganKehadiranStore } from "@/store/tunjanganKehadiran/tunjangan
 import { TunjanganKehadiranColumns } from "./TunjanganKehadiranColumns";
 import TunjanganKehadiranCreateForm from "../(form)/TunjanganKehadiranCreateForm";
 import TunjanganKehadiranEditForm from "../(form)/TunjanganKehadiranEditForm";
+import { useToastStore } from "@/store/toastStore";
+import ModalToast from "@/components/custom/modal-toast";
 
 const TunjanganKehadiranTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
 
   const tunjanganKehadirans = useTunjanganKehadiranStore(
@@ -48,8 +56,18 @@ const TunjanganKehadiranTable = () => {
       await deleteTunjanganKehadiran(
         tunjanganKehadiranData?.id_tunjangan_kehadiran as string,
       );
+      setToast({
+        isOpen: true,
+        message: "Data tunjangan kehadiran berhasil dihapus",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data tunjangan kehadiran gagal dihapus",
+        type: "error",
+      });
       console.log(error);
     }
   };
@@ -72,6 +90,14 @@ const TunjanganKehadiranTable = () => {
 
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <div className="space-y-4">
         <DataTable
           data={tunjanganKehadirans}

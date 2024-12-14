@@ -17,17 +17,29 @@ import { Button } from "@/components/custom/button";
 import { useUserStore } from "@/store/user/userStore";
 import { TypeUserCreate, UserCreateSchema } from "./UserSchema";
 import Image from "next/image";
+import { useToastStore } from "@/store/toastStore";
 
 interface UserCreateFormProps {
   onSuccess: () => void;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function UserCreateForm({ onSuccess }: UserCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const insertUser = useUserStore((state) => state.insertUser);
 
-  const roleOptions = [
+  const roleOptions: Option[] = [
     {
       value: "admin",
       label: "Admin",
@@ -86,6 +98,11 @@ export default function UserCreateForm({ onSuccess }: UserCreateFormProps) {
       const res = await insertUser({ ...data, image: selectedFile });
       formUser.reset();
       onSuccess();
+      setToast({
+        isOpen: true,
+        message: "User berhasil ditambahkan",
+        type: "success",
+      });
     } catch (error: Error | any) {
       console.error("Error Insert User Create:", error);
       const errMsg = error.response.data.message;

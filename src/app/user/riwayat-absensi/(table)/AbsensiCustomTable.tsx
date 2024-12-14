@@ -53,7 +53,6 @@ const AbsensiCustomTable = ({
   // Contoh penggunaan:
   const hadirCount = countStatusAbsen("hadir");
   const izinCount = countStatusAbsen("izin");
-  const sakitCount = countStatusAbsen("sakit");
   const terlambatCount = countStatusAbsen("terlambat");
   const tidakHadirCount = countStatusAbsen("tidak_hadir");
   return (

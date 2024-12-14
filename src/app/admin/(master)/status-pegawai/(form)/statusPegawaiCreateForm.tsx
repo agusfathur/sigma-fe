@@ -17,6 +17,7 @@ import {
   StatusPegawaiCreateSchema,
   TypeStatusPegawaiCreate,
 } from "./statusPegawaiSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface StatusPegawaiCreateFormProps {
   onSuccess: () => void;
@@ -25,6 +26,12 @@ interface StatusPegawaiCreateFormProps {
 export default function StatusPegawaiCreateForm({
   onSuccess,
 }: StatusPegawaiCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const insertStatusKepegawaian = useStatusKepegawaianStore(
@@ -43,9 +50,19 @@ export default function StatusPegawaiCreateForm({
     try {
       const res = await insertStatusKepegawaian(data);
       formStatusPegawai.reset();
+      setToast({
+        isOpen: true,
+        message: "Status Pegawai berhasil ditambahkan",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
-      console.error("Error Insert Jabatan:", error);
+      setToast({
+        isOpen: true,
+        message: "Status Pegawai gagal ditambahkan",
+        type: "error",
+      });
+      console.error("Error Insert Status Pegawai:", error);
     } finally {
       setIsLoading(false);
     }

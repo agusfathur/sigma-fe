@@ -14,12 +14,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/custom/button";
 import { useLokasiStore } from "@/store/lokasi/lokasiStore";
 import { LokasiUpdateSchema, TypeLokasiUpdate } from "./LokasiSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface LokasiCreateFormProps {
   onSuccess: () => void;
 }
 
 export default function LokasiUpdateForm({ onSuccess }: LokasiCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const lokasiData = useLokasiStore((state) => state.lokasiData);
@@ -67,8 +74,18 @@ export default function LokasiUpdateForm({ onSuccess }: LokasiCreateFormProps) {
         koordinat: `${lokasi.latitude}, ${lokasi.longitude}`,
       });
       formLokasi.reset();
+      setToast({
+        isOpen: true,
+        message: "Lokasi berhasil diubah",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Lokasi gagal diubah",
+        type: "error",
+      });
       console.error("Error Insert Jabatan:", error);
     } finally {
       setIsLoading(false);

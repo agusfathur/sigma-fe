@@ -18,6 +18,7 @@ import {
   TypeSettingAppUpdate,
 } from "./SettingAppSchema";
 import { SettingApp } from "@/store/settingApp/settingApp.types";
+import { useToastStore } from "@/store/toastStore";
 
 interface SettingAppFormProps {
   onSuccess: () => void;
@@ -28,6 +29,12 @@ export default function SettingAppForm({
   onSuccess,
   settingApp,
 }: SettingAppFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
   const updateSetingApp = useSettingAppStore((state) => state.updateSettingApp);
 
@@ -96,8 +103,18 @@ export default function SettingAppForm({
         });
       }
       onSuccess();
+      setToast({
+        isOpen: true,
+        message: "Setting App Berhasil Diupdate",
+        type: "success",
+      });
     } catch (error: Error | any) {
-      console.error("Error Insert User Create:", error);
+      setToast({
+        isOpen: true,
+        message: "Setting App Gagal Diupdate",
+        type: "error",
+      });
+      console.error("Error Update Setting App:", error);
     } finally {
       setIsLoading(false);
     }

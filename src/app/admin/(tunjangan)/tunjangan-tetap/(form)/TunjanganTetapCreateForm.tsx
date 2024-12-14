@@ -18,6 +18,7 @@ import {
   TunjanganTetapCreateSchema,
   TypeTunjanganTetapCreate,
 } from "./TunjanganTetapSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface TunjanganTetapCreateFormProps {
   onSuccess: () => void;
@@ -26,6 +27,12 @@ interface TunjanganTetapCreateFormProps {
 export default function TunjanganTetapCreateForm({
   onSuccess,
 }: TunjanganTetapCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const insertTunjanganTetap = useTunjanganTetapStore(
@@ -45,9 +52,19 @@ export default function TunjanganTetapCreateForm({
     try {
       const res = await insertTunjanganTetap(data);
       formTunjanganTetap.reset();
+      setToast({
+        isOpen: true,
+        message: "Data Berhasil Ditambahkan",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
-      console.error("Error Insert THR:", error);
+      setToast({
+        isOpen: true,
+        message: "Data Gagal Ditambahkan",
+        type: "error",
+      });
+      console.error("Error Insert Tunjangan Tetap:", error);
     } finally {
       setIsLoading(false);
     }

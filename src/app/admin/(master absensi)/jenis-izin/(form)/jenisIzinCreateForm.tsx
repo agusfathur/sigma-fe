@@ -15,14 +15,26 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/custom/button";
 import { useJenisIzinStore } from "@/store/jenisIzin/jenisIzinStore";
 import { JenisIzinCreateSchema, TypeJenisIzinCreate } from "./jenisIzinSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface JenisIzinCreateFormProps {
   onSuccess: () => void;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function JenisIzinCreateForm({
   onSuccess,
 }: JenisIzinCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const insertJenisIzin = useJenisIzinStore((state) => state.insertJenisIzin);
@@ -37,7 +49,7 @@ export default function JenisIzinCreateForm({
     },
   });
 
-  const categoryOptions: any = [
+  const categoryOptions: Option[] = [
     {
       value: "cuti",
       label: "Cuti",
@@ -53,8 +65,18 @@ export default function JenisIzinCreateForm({
     try {
       const res = await insertJenisIzin(data);
       formJenisIzin.reset();
+      setToast({
+        isOpen: true,
+        message: "Data Jenis Izin Berhasil Ditambahkan",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data Jenis Izin Gagal Ditambahkan",
+        type: "error",
+      });
       console.error("Error Insert Jabatan:", error);
     } finally {
       setIsLoading(false);
@@ -98,7 +120,7 @@ export default function JenisIzinCreateForm({
                     }
                     value={
                       categoryOptions.find(
-                        (option: any) =>
+                        (option: Option) =>
                           String(option.value) === String(field.value),
                       ) || null
                     }

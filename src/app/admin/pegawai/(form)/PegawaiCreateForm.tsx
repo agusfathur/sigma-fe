@@ -23,14 +23,26 @@ import { useJabatanFungsionalStore } from "@/store/jabatanFungsional/jabatanFung
 import { useStatusKepegawaianStore } from "@/store/statusKepegawaian/statusKepegawaianStore";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
+import { useToastStore } from "@/store/toastStore";
 
 interface PegawaiCreateFormProps {
   onSuccess: () => void;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function PegawaiCreateForm({
   onSuccess,
 }: PegawaiCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
   const [riwayatPendidikan, setRiwayatPendidikan] = useState([""]);
   const [preview, setPreview] = useState<string | null>(null);
@@ -40,7 +52,7 @@ export default function PegawaiCreateForm({
   // Lokasi
   const fetchLokasi = useLokasiStore((state) => state.fetchLokasi);
   const lokasis = useLokasiStore((state) => state.lokasi);
-  const lokasiOptions = lokasis.map((lokasi) => ({
+  const lokasiOptions: Option[] = lokasis.map((lokasi) => ({
     value: lokasi.id_lokasi,
     label: lokasi.nama,
   }));
@@ -48,7 +60,7 @@ export default function PegawaiCreateForm({
   // jabatan
   const fetchJabatan = useJabatanStore((state) => state.fetchJabatan);
   const jabatans = useJabatanStore((state) => state.jabatan);
-  const jabatanOptions = jabatans.map((jabatan) => ({
+  const jabatanOptions: Option[] = jabatans.map((jabatan) => ({
     value: jabatan.id_jabatan,
     label: jabatan.nama,
   }));
@@ -60,7 +72,7 @@ export default function PegawaiCreateForm({
   const jabatanFungsionals = useJabatanFungsionalStore(
     (state) => state.jabatanFungsional,
   );
-  const jabatanFungsionalOptions = jabatanFungsionals.map(
+  const jabatanFungsionalOptions: Option[] = jabatanFungsionals.map(
     (jabatanFungsional) => ({
       value: jabatanFungsional.id_jabatan_fungsional,
       label: jabatanFungsional.nama,
@@ -75,7 +87,7 @@ export default function PegawaiCreateForm({
     (state) => state.statusKepegawaian,
   );
 
-  const statusKepegawaianOptions = statusKepegawaians.map(
+  const statusKepegawaianOptions: Option[] = statusKepegawaians.map(
     (statusKepegawaian) => ({
       value: statusKepegawaian.id_status_kepegawaian,
       label: statusKepegawaian.nama,
@@ -83,7 +95,7 @@ export default function PegawaiCreateForm({
   );
 
   // agama
-  const agamaOptions = [
+  const agamaOptions: Option[] = [
     { value: "islam", label: "Islam" },
     { value: "kristen", label: "Kristen" },
     { value: "katolik", label: "Katolik" },
@@ -93,19 +105,25 @@ export default function PegawaiCreateForm({
   ];
 
   // gender
-  const genderOptions = [
+  const genderOptions: Option[] = [
     { value: "laki_laki", label: "Laki-laki" },
     { value: "perempuan", label: "Perempuan" },
   ];
 
   // tenaga role
-  const tenagaRoleOptions = [
+  const tenagaRoleOptions: Option[] = [
     { value: "pendidik", label: "Tenaga Pendidik" },
     { value: "kependidikan", label: "Tenaga Kependidikan" },
   ];
 
+  // status tetap
+  const statusTetapOptions: Option[] = [
+    { value: "tetap", label: "Tetap" },
+    { value: "tidak_tetap", label: "Tidak Tetap" },
+  ];
+
   // status pegawai
-  const statusPegawaiOptions = [
+  const statusPegawaiOptions: Option[] = [
     { value: "aktif", label: "Aktif" },
     { value: "pindah", label: "Pindah" },
     { value: "keluar", label: "Keluar" },
@@ -115,14 +133,14 @@ export default function PegawaiCreateForm({
 
   // user
   // userRole
-  const userRoleOptions = [
+  const userRoleOptions: Option[] = [
     { value: "admin", label: "Admin" },
     { value: "super_admin", label: "Super Admin" },
     { value: "user", label: "User" },
   ];
 
   // status pernikahan
-  const statusPernikahanOptions = [
+  const statusPernikahanOptions: Option[] = [
     { value: "menikah", label: "Menikah" },
     { value: "belum menikah", label: "Belum Menikah" },
     { value: "janda", label: "Janda" },
@@ -147,6 +165,7 @@ export default function PegawaiCreateForm({
       gender: "",
       agama: "",
       tenaga: "",
+      status_tetap: "",
       jabatan_id: "",
       status_kepegawaian_id: "",
       riwayat_pendidikan: [""],
@@ -223,6 +242,11 @@ export default function PegawaiCreateForm({
 
       if (create) {
         onSuccess();
+        setToast({
+          isOpen: true,
+          message: "Pegawai berhasil ditambahkan",
+          type: "success",
+        });
       }
     } catch (error: Error | any) {
       console.error("Error Insert Jadwal Kerja:", error);
@@ -784,6 +808,52 @@ export default function PegawaiCreateForm({
             {/* kepegawaian start */}
             <TabsContent value="kepegawaian" className="space-y-4">
               <div className="grid gap-2">
+                {/* status tetap */}
+                <FormField
+                  control={formPegawai.control}
+                  name="status_tetap"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-sm lg:text-base">
+                        Status Tetap
+                      </FormLabel>
+                      <Select
+                        {...field}
+                        options={statusTetapOptions}
+                        className="w-full rounded-md dark:text-black"
+                        classNamePrefix="react-select"
+                        placeholder="Select status tetap"
+                        theme={(theme) => ({
+                          ...theme,
+                          colors: {
+                            ...theme.colors,
+                            primary: "black", // Warna border saat di-focus
+                            primary25: "#e5e7eb", // Warna abu-abu terang saat di-hover
+                            primary50: "#d1d5db", // Warna abu-abu saat di-click
+                            neutral20: "black", // Border default
+                            neutral80: "black",
+                          },
+                        })}
+                        onChange={(selectedOption) =>
+                          field.onChange(
+                            selectedOption ? String(selectedOption.value) : "",
+                          )
+                        }
+                        value={
+                          statusTetapOptions.find(
+                            (option: any) =>
+                              String(option.value) === String(field.value),
+                          ) || null
+                        }
+                      />
+                      <FormControl></FormControl>
+                      <div className="h-2">
+                        <FormMessage className="text-xs" />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
                 {/* status pegawai */}
                 <FormField
                   control={formPegawai.control}

@@ -10,16 +10,28 @@ import { useDataSekolahStore } from "@/store/dataSekolah/dataSekolahStore";
 import { usePegawaiStore } from "@/store/pegawai/pegawaiStore";
 import { TypeSekolahUpdate } from "./SekolahSchema";
 import { DataSekolah } from "@/store/dataSekolah/dataSekolah.types";
+import { useToastStore } from "@/store/toastStore";
 
 interface SekolahUpdateFormProps {
   onSuccess: () => void;
   dataSekolah: DataSekolah;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function SekolahForm({
   onSuccess,
   dataSekolah,
 }: SekolahUpdateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const updateDataSekolah = useDataSekolahStore(
@@ -32,7 +44,7 @@ export default function SekolahForm({
   const [preview, setPreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const pegawaiOptions = pegawai.map((pegawai) => ({
+  const pegawaiOptions: Option[] = pegawai.map((pegawai) => ({
     value: pegawai.id_pegawai,
     label: `${pegawai.nama} - ${pegawai.jabatan.nama}`,
   }));
@@ -146,7 +158,17 @@ export default function SekolahForm({
         });
       }
       onSuccess();
+      setToast({
+        isOpen: true,
+        type: "success",
+        message: "Data sekolah berhasil diupdate",
+      });
     } catch (error: Error | any) {
+      setToast({
+        isOpen: true,
+        type: "error",
+        message: "Data sekolah gagal diupdate",
+      });
       console.error("Error Update Sekolah:", error);
     } finally {
       setIsLoading(false);

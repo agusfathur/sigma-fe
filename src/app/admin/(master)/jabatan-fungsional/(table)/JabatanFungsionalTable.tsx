@@ -8,8 +8,16 @@ import Modal from "@/components/custom/modal";
 import JabatanFungsionalCreateForm from "../(form)/JabatanFungsionalCreateForm";
 import ModalDelete from "@/components/custom/modal-delete";
 import JabatanFungsionalUpdateForm from "../(form)/JabatanFungsionalEditForm";
+import ModalToast from "@/components/custom/modal-toast";
+import { useToastStore } from "@/store/toastStore";
 
 const JabatanFungsionalTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const fetchJabatanFungsional = useJabatanFungsionalStore(
     (state) => state.fetchJabatanFungsional,
   );
@@ -67,6 +75,14 @@ const JabatanFungsionalTable = () => {
   };
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <DataTable
         data={jabatanFungsionals}
         columns={jabatanFungsionalColumns}

@@ -18,6 +18,7 @@ import {
   TunjanganTetapUpdateSchema,
   TypeTunjanganTetapUpdate,
 } from "./TunjanganTetapSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface TunjanganTetapEditFormProps {
   onSuccess: () => void;
@@ -26,6 +27,12 @@ interface TunjanganTetapEditFormProps {
 export default function TunjanganTetapEditForm({
   onSuccess,
 }: TunjanganTetapEditFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const updateTunjanganTetap = useTunjanganTetapStore(
@@ -50,8 +57,18 @@ export default function TunjanganTetapEditForm({
     try {
       const res = updateTunjanganTetap(data);
       formTunjanganTetap.reset();
+      setToast({
+        isOpen: true,
+        message: "Data Tunjangan Tetap Berhasil Diupdate",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data Tunjangan Tetap Gagal Diupdate",
+        type: "error",
+      });
       console.error("Error Insert Jabatan:", error);
     } finally {
       setIsLoading(false);

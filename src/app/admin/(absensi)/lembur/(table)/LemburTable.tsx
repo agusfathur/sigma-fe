@@ -11,8 +11,15 @@ import { Button } from "@/components/custom/button";
 import { lemburColumns } from "./LemburColumns";
 import { useLemburStore } from "@/store/lembur/lemburStore";
 import Image from "next/image";
+import { useToastStore } from "@/store/toastStore";
+
+interface Option {
+  value: string;
+  label: string;
+}
 
 const LemburTable = () => {
+  const { setToast } = useToastStore();
   const lemburs = useLemburStore((state) => state.lembur);
 
   const fetchJamKerja = useJamKerjaStore((state) => state.fetchJamKerja);
@@ -43,7 +50,7 @@ const LemburTable = () => {
   const [statusLembur, setStatusLembur] = useState<string>(
     lemburData?.status_lembur || "",
   );
-  const statusOptions = [
+  const statusOptions: Option[] = [
     { value: "pending", label: "pending" },
     { value: "diterima", label: "diterima" },
     { value: "ditolak", label: "ditolak" },
@@ -73,7 +80,7 @@ const LemburTable = () => {
   };
 
   const getBulanOption = () => {
-    const options = [
+    const options: Option[] = [
       {
         value: "01",
         label: "Januari",
@@ -187,6 +194,11 @@ const LemburTable = () => {
         lemburData?.id_lembur as string,
       );
       await fetchAllLemburByFilter(query);
+      setToast({
+        type: "success",
+        message: "Status lembur berhasil diubah",
+        isOpen: true,
+      });
       setIsModalEditOpen(false);
     } catch (error) {
       console.error(error);
@@ -246,7 +258,8 @@ const LemburTable = () => {
             }
             value={
               statusOptions.find(
-                (option: any) => String(option.value) === String(statusLembur),
+                (option: Option) =>
+                  String(option.value) === String(statusLembur),
               ) || null
             }
           />

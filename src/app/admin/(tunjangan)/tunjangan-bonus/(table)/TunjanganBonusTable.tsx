@@ -10,8 +10,16 @@ import THREditForm from "../(form)/TunjanganBonusEditForm";
 import { useTunjanganBonusStore } from "@/store/tunjanganBonus/tunjanganBonusStore";
 import { TunjanganBonusColumns } from "./TunjanganBonusColumns";
 import TunjanganTetapCreateForm from "../(form)/TunjanganBonusCreateForm";
+import { useToastStore } from "@/store/toastStore";
+import ModalToast from "@/components/custom/modal-toast";
 
 const TunjanganBonusTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
 
   const tunjanganBonuss = useTunjanganBonusStore(
@@ -95,8 +103,18 @@ const TunjanganBonusTable = () => {
       await deleteTunjanganBonus(
         tunjanganBonusData?.id_tunjangan_bonus as string,
       );
+      setToast({
+        isOpen: true,
+        message: "Data tunjangan bonus berhasil dihapus",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data tunjangan bonus gagal dihapus",
+        type: "error",
+      });
       console.log(error);
     }
   };
@@ -120,6 +138,14 @@ const TunjanganBonusTable = () => {
 
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <div className="space-y-4">
         <h3>
           Filter : <span>{textFilter}</span>

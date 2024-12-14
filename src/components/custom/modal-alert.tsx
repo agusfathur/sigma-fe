@@ -22,10 +22,10 @@ const ModalAlert = ({
           onClick={() => onClose && onClose()}
         >
           {/* Background Blur and Dark Overlay */}
-          <div
+          {/* <div
             className="absolute inset-0 bg-black bg-opacity-65 backdrop-blur-[2px]"
             onClick={() => setIsModalAlertOpen(false)}
-          ></div>
+          ></div> */}
           <div
             tabIndex={-1}
             className="relative z-50 my-auto flex max-h-[80vh] w-full max-w-xl items-center justify-center p-4 md:p-0"
@@ -36,10 +36,10 @@ const ModalAlert = ({
               <div className="p-4 md:px-5 md:py-4">
                 <div className="text-center">
                   {type === "success" && (
-                    <DotLottieReact src="/lottie/oke.lottie" loop autoplay />
+                    <DotLottieReact src="/lottie/oke.lottie" autoplay />
                   )}
                   {type === "error" && (
-                    <DotLottieReact src="/lottie/alert.lottie" loop autoplay />
+                    <DotLottieReact src="/lottie/alert.lottie" autoplay />
                   )}
                 </div>
                 <div className="p-4 text-center md:p-5">
@@ -48,7 +48,7 @@ const ModalAlert = ({
                   </h3>
                   <Button
                     variant="default"
-                    className="w-[100px]"
+                    className="w-[100px] active:scale-95"
                     onClick={() => setIsModalAlertOpen(false)}
                   >
                     OK

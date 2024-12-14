@@ -218,31 +218,11 @@ export const sidelinks: SideLink[] = [
     label: "",
     href: "/admin/settings",
     icon: <IconSettings size={18} />,
-    // sub: [
-    //   {
-    //     title: "Setting App",
-    //     label: "",
-    //     href: "/admin/setting-app",
-    //     icon: <IconSettingsPin size={18} />,
-    //   },
-    //   {
-    //     title: "Data Sekolah",
-    //     label: "",
-    //     href: "/admin/setting-sekolah",
-    //     icon: <IconSchool size={18} />,
-    //   },
-    //   {
-    //     title: "User Management",
-    //     label: "",
-    //     href: "/admin/setting-user",
-    //     icon: <IconUserCog size={18} />,
-    //   },
-    // ],
   },
   {
     title: "Laporan",
     label: "",
-    href: "",
+    href: "/admin/laporan",
     icon: <IconReport size={18} />,
   },
 ];

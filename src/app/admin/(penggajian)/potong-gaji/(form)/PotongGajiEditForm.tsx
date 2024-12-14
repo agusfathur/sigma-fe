@@ -22,14 +22,26 @@ import {
   TypePotongGajiCreate,
   TypePotongGajiUpdate,
 } from "./PotongGajiSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface PotongGajiEditFormProps {
   onSuccess: () => void;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function PotongGajiEditForm({
   onSuccess,
 }: PotongGajiEditFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const updatePotongGaji = usePotongGajiStore(
@@ -41,7 +53,7 @@ export default function PotongGajiEditForm({
 
   const potongGajiData = usePotongGajiStore((state) => state.potongGajiData);
 
-  const pegawaiOptions = pegawais.map((pegawai) => ({
+  const pegawaiOptions: Option[] = pegawais.map((pegawai) => ({
     value: pegawai.id_pegawai,
     label: `${pegawai.nama} - ${pegawai.jabatan.nama}`,
   }));
@@ -67,9 +79,19 @@ export default function PotongGajiEditForm({
         tahun: new Date().getFullYear(),
       });
       formPotongGaji.reset();
+      setToast({
+        isOpen: true,
+        message: "Data potong gaji berhasil diupdate",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
-      console.error("Error Insert Tunjangan Bonus:", error);
+      setToast({
+        isOpen: true,
+        message: "Data potong gaji gagal diupdate",
+        type: "error",
+      });
+      console.error("Error Insert Potong Gaji:", error);
     } finally {
       setIsLoading(false);
     }
@@ -118,7 +140,7 @@ export default function PotongGajiEditForm({
                     }
                     value={
                       pegawaiOptions.find(
-                        (option: any) =>
+                        (option: Option) =>
                           String(option.value) === String(field.value),
                       ) || null
                     }

@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import { create } from "zustand";
 import { jwtDecode } from "jwt-decode";
 import axiosJWT from "@/lib/authJWT";
+import { signOut } from "next-auth/react";
 
 interface AuthState {
   accessToken: string | null;
@@ -28,7 +30,6 @@ const useAuthStore = create<AuthState>((set, get) => ({
     const { isTokenExpired, setAccessToken } = get();
 
     if (!isTokenExpired()) {
-      // If token is not expired, no need to fetch a new one
       return;
     }
     try {
@@ -40,7 +41,11 @@ const useAuthStore = create<AuthState>((set, get) => ({
       );
       const { accessToken } = res.data.data;
       setAccessToken(accessToken);
-    } catch (error) {
+    } catch (error: Error | any) {
+      const statusCode = error.response?.data?.statusCode;
+      if (statusCode === 401) {
+        await signOut({ redirect: true });
+      }
       console.log("Error fetching access token:", error);
     }
   },

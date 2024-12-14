@@ -15,12 +15,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/custom/button";
 import { usePajakStore } from "@/store/pajak/pajakStore";
 import { PajakCreateSchema, TypePajakCreate } from "./PajakSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface PajakCreateFormProps {
   onSuccess: () => void;
 }
 
 export default function PajakCreateForm({ onSuccess }: PajakCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const insertPajak = usePajakStore((state) => state.insertPajak);
@@ -40,9 +47,19 @@ export default function PajakCreateForm({ onSuccess }: PajakCreateFormProps) {
         persen: Number(data.persen),
       });
       formPajak.reset();
+      setToast({
+        isOpen: true,
+        message: "Data pajak berhasil ditambahkan",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
-      console.error("Error Insert THR:", error);
+      setToast({
+        isOpen: true,
+        message: "Data pajak gagal ditambahkan",
+        type: "error",
+      });
+      console.error("Error Insert Pajak:", error);
     } finally {
       setIsLoading(false);
     }

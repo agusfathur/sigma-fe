@@ -8,8 +8,21 @@ import Modal from "@/components/custom/modal";
 import { usePinjamanStore } from "@/store/pinjaman/pinjamanStore";
 import { PinjamanColumns } from "./PinjamanColumns";
 import { Button } from "@/components/custom/button";
+import { useToastStore } from "@/store/toastStore";
+import ModalToast from "@/components/custom/modal-toast";
+
+interface Option {
+  value: string;
+  label: string;
+}
 
 const PinjamanTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
 
   const pinjamans = usePinjamanStore((state) => state.pinjaman);
@@ -18,7 +31,6 @@ const PinjamanTable = () => {
     (state) => state.fetchPinjamanByFilter,
   );
   const pinjamanData = usePinjamanStore((state) => state.pinjamanData);
-  const deletePinjaman = usePinjamanStore((state) => state.deletePinjaman);
 
   const isModalEditOpen = usePinjamanStore((state) => state.isModalEditOpen);
   const setIsModalEditOpen = usePinjamanStore(
@@ -41,7 +53,7 @@ const PinjamanTable = () => {
   const [statusPinjaman, setStatusPinjaman] = useState<string>(
     pinjamanData?.status_pinjaman || "",
   );
-  const statusOptions = [
+  const statusOptions: Option[] = [
     { value: "pending", label: "pending" },
     { value: "diterima", label: "diterima" },
     { value: "ditolak", label: "ditolak" },
@@ -198,8 +210,18 @@ const PinjamanTable = () => {
         pinjamanData?.id_pinjaman as string,
         statusPinjaman as string,
       );
+      setToast({
+        isOpen: true,
+        message: "Status pinjaman berhasil diupdate",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Status pinjaman gagal diupdate",
+        type: "error",
+      });
       console.error(error);
     }
   };
@@ -223,6 +245,14 @@ const PinjamanTable = () => {
 
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <div className="space-y-4">
         <h3>
           Filter : <span>{textFilter}</span>

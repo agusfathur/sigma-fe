@@ -10,10 +10,24 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RecentSales } from "./components/recent-sales";
 import { Overview } from "./components/overview";
+import ModalToast from "@/components/custom/modal-toast";
+import { useState } from "react";
 
 export default function DashboardPage() {
+  const [toast, setToast] = useState({
+    open: false,
+    type: "success",
+    message: "",
+  });
+
   return (
     <>
+      <ModalToast
+        isOpen={toast.open}
+        onClose={() => setToast({ open: false, type: "success", message: "" })}
+        message={toast.message}
+        type={toast.type as "success" | "error"}
+      />
       <div className="mb-2 flex items-center justify-between space-y-2">
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <div className="flex items-center space-x-2">

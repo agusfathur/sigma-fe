@@ -8,8 +8,16 @@ import { useDataLiburStore } from "@/store/dataLibur/dataLiburStore";
 import { dataLiburColumns } from "./DataLiburColumns";
 import DataLiburCreateForm from "../(form)/DataLiburCreateForm";
 import DataLiburUpdateForm from "../(form)/DataLiburEditForm";
+import ModalToast from "@/components/custom/modal-toast";
+import { useToastStore } from "@/store/toastStore";
 
 const DataLiburTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const fetchDataLibur = useDataLiburStore((state) => state.fetchDataLibur);
   const dataLiburs = useDataLiburStore((state) => state.dataLibur);
 
@@ -49,6 +57,11 @@ const DataLiburTable = () => {
     if (!dataLiburData) return;
     try {
       await deleteDataLibur(dataLiburData?.id_libur);
+      setToast({
+        isOpen: true,
+        message: "Data Libur | Cuti Berhasil Dihapus",
+        type: "success",
+      });
       await fetchDataLibur();
     } catch (error) {
       console.log(error);
@@ -58,6 +71,14 @@ const DataLiburTable = () => {
   };
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+        message={message}
+        type={toastType}
+      />
       <DataTable
         data={dataLiburs}
         columns={dataLiburColumns}

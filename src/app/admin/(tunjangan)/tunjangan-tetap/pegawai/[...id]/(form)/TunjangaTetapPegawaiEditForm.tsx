@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import {
   FormControl,
@@ -20,18 +20,30 @@ import {
   TypeTunjangaTetapPegawaiUpdate,
 } from "./TunjangaTetapPegawaiSchema";
 import { useTunjanganTetapStore } from "@/store/tunjanganTetap/tunjanganTetapStore";
+import { useToastStore } from "@/store/toastStore";
 
 interface TunjangaTetapPegawaiEditFormProps {
   onSuccess: () => void;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function TunjangaTetapPegawaiEditForm({
   onSuccess,
 }: TunjangaTetapPegawaiEditFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
-  const [tunjanganTetapOptions, setTunjanganTetapOptions] = useState<
-    { value: number; label: string }[]
-  >([]);
+  const [tunjanganTetapOptions, setTunjanganTetapOptions] = useState<Option[]>(
+    [],
+  );
 
   const updateTunjangaTetapPegawai = useTunjanganTetapPegawaiStore(
     (state) => state.updateTunjanganTetapPegawai,
@@ -48,15 +60,15 @@ export default function TunjangaTetapPegawaiEditForm({
     (state) => state.fetchTunjanganTetap,
   );
 
-  const getTunjanganTetapOptions = () => {
-    const options = tunjanganTetap.map((tunjanganTetap) => ({
+  const getTunjanganTetapOptions = useCallback(() => {
+    const options: Option[] = tunjanganTetap.map((tunjanganTetap) => ({
       value: tunjanganTetap.id_tunjangan_tetap,
       label: `${tunjanganTetap.nama} - Rp. ${new Intl.NumberFormat(
         "id-ID",
       ).format(tunjanganTetap.nominal)}`,
     }));
-    setTunjanganTetapOptions(options as any);
-  };
+    setTunjanganTetapOptions(options);
+  }, [tunjanganTetap]);
 
   const formTunjangaTetapPegawai = useForm<TypeTunjangaTetapPegawaiUpdate>({
     resolver: zodResolver(TunjangaTetapPegawaiUpdateSchema),
@@ -75,8 +87,19 @@ export default function TunjangaTetapPegawaiEditForm({
     try {
       const res = await updateTunjangaTetapPegawai(data);
       formTunjangaTetapPegawai.reset();
+
+      setToast({
+        isOpen: true,
+        message: "Data Tunjangan Tetap Pegawai Berhasil Diupdate",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data Tunjangan Tetap Pegawai Gagal Diupdate",
+        type: "error",
+      });
       console.error("Error Insert THR:", error);
     } finally {
       setIsLoading(false);
@@ -86,7 +109,7 @@ export default function TunjangaTetapPegawaiEditForm({
   useEffect(() => {
     fetchTunjanganTetap();
     getTunjanganTetapOptions();
-  }, [fetchTunjanganTetap]);
+  }, [fetchTunjanganTetap, getTunjanganTetapOptions]);
 
   return (
     <>
@@ -125,7 +148,7 @@ export default function TunjangaTetapPegawaiEditForm({
                     }
                     value={
                       tunjanganTetapOptions.find(
-                        (option: any) =>
+                        (option: Option) =>
                           String(option.value) === String(field.value),
                       ) || null
                     }

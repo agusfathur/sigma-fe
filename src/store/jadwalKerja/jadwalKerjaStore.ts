@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
 import axiosJWT from "@/lib/authJWT";
-import { JadwalKerja, JadwalKerjaCreate } from "./jadwalKerja.types";
+import {
+  JadwalKerja,
+  JadwalKerjaCreate,
+  JadwalKerjaUpdate,
+} from "./jadwalKerja.types";
 
 interface JadwalKerjaState {
   jadwalKerja: JadwalKerja[];
@@ -16,7 +20,7 @@ interface JadwalKerjaState {
     userId: string,
     filter: string,
   ) => Promise<any>;
-  updateJadwalKerja: (jadwalKerja: JadwalKerja) => Promise<any>;
+  updateJadwalKerja: (jadwalKerja: JadwalKerjaUpdate) => Promise<any>;
   deleteJadwalKerja: (id: string) => Promise<any>;
   jadwalKerjaById: (id: string) => JadwalKerja | undefined;
   isModalEditOpen: boolean;
@@ -81,6 +85,7 @@ export const useJadwalKerjaStore = create<JadwalKerjaState>((set, get) => ({
       );
 
       set({ jadwalKerja: res.data.data });
+      return res.data.data;
     } catch (error) {
       console.log(error);
     }
@@ -96,7 +101,7 @@ export const useJadwalKerjaStore = create<JadwalKerjaState>((set, get) => ({
       console.log(error);
     }
   },
-  updateJadwalKerja: async (jadwalKerja: JadwalKerja) => {
+  updateJadwalKerja: async (jadwalKerja: JadwalKerjaUpdate) => {
     try {
       const update = await axiosJWT.put(
         `${process.env.NEXT_PUBLIC_API_URL}/api/jadwal-pegawai/${jadwalKerja.id_jadwal}`,

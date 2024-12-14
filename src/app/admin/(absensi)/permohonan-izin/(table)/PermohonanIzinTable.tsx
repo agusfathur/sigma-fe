@@ -11,8 +11,20 @@ import { permohonanIzinColumns } from "./PermohonanIzinColumns";
 // import Image from "next/image";
 import { usePermohonanIzinStore } from "@/store/permohonanIzin/permohonanIzinStore";
 import Image from "next/image";
+import ModalToast from "@/components/custom/modal-toast";
+
+interface Option {
+  value: string;
+  label: string;
+}
 
 const PermohonanIzinTable = () => {
+  const [toast, setToast] = useState({
+    open: false,
+    type: "success",
+    message: "",
+  });
+
   const permpohonanIzins = usePermohonanIzinStore(
     (state) => state.permohonanIzin,
   );
@@ -52,7 +64,7 @@ const PermohonanIzinTable = () => {
   const [statusIzin, setStatusIzin] = useState<string>(
     permohonanIzinData?.status || "",
   );
-  const statusOptions = [
+  const statusOptions: Option[] = [
     { value: "pending", label: "pending" },
     { value: "diterima", label: "diterima" },
     { value: "ditolak", label: "ditolak" },
@@ -82,7 +94,7 @@ const PermohonanIzinTable = () => {
   };
 
   const getBulanOption = () => {
-    const options = [
+    const options: Option[] = [
       {
         value: "01",
         label: "Januari",
@@ -196,8 +208,18 @@ const PermohonanIzinTable = () => {
         permohonanIzinData?.id_permohonan_izin as string,
       );
       await fetchPermohonanIzinByFilter(query);
+      setToast({
+        open: true,
+        message: "Status Izin Berhasil Diubah",
+        type: "success",
+      });
       setIsModalEditOpen(false);
     } catch (error) {
+      setToast({
+        open: true,
+        message: "Status Izin Gagal Diubah",
+        type: "error",
+      });
       console.error(error);
     }
   };
@@ -211,6 +233,12 @@ const PermohonanIzinTable = () => {
 
   return (
     <>
+      {/* toasr */}
+      <ModalToast
+        isOpen={toast.open}
+        message={toast.message}
+        type={toast.type as "success" | "error"}
+      />
       <div className="space-y-4">
         <h3>
           Filter : <span>{textFilter}</span>
@@ -253,7 +281,7 @@ const PermohonanIzinTable = () => {
             }
             defaultValue={
               statusOptions.find(
-                (option: any) =>
+                (option: Option) =>
                   String(option.value) === String(permohonanIzinData?.status),
               ) || null
             }

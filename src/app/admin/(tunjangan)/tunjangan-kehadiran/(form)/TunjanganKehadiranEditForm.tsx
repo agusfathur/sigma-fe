@@ -19,14 +19,26 @@ import {
   TypeTunjanganKehadiranUpdate,
 } from "./TunjanganKehadiranSchema";
 import { useTunjanganKehadiranStore } from "@/store/tunjanganKehadiran/tunjanganKehadiranStore";
+import { useToastStore } from "@/store/toastStore";
 
 interface TunjanganKehadiranEditFormProps {
   onSuccess: () => void;
 }
 
+interface OptionNumber {
+  value: number;
+  label: string;
+}
+
 export default function TunjanganKehadiranEditForm({
   onSuccess,
 }: TunjanganKehadiranEditFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const updateTunjanganKehadiran = useTunjanganKehadiranStore(
@@ -37,9 +49,7 @@ export default function TunjanganKehadiranEditForm({
     (state) => state.tunjanganKehadiranData,
   );
 
-  const [tahunOptions, setTahunOptions] = useState<
-    { value: number; label: string }[]
-  >([]);
+  const [tahunOptions, setTahunOptions] = useState<OptionNumber[]>([]);
 
   const getTahunOption = () => {
     const tahun = new Date().getFullYear(); // Mendapatkan tahun saat ini
@@ -66,9 +76,19 @@ export default function TunjanganKehadiranEditForm({
     try {
       const res = updateTunjanganKehadiran(data);
       formTunjanganKehadiran.reset();
+      setToast({
+        isOpen: true,
+        message: "Data tunjangan kehadiran berhasil diubah",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
-      console.error("Error Insert Jabatan:", error);
+      setToast({
+        isOpen: true,
+        message: "Data tunjangan kehadiran gagal diubah",
+        type: "error",
+      });
+      console.error("Error Update Tunjangan Kehadiran:", error);
     } finally {
       setIsLoading(false);
     }
@@ -114,7 +134,7 @@ export default function TunjanganKehadiranEditForm({
                     }
                     value={
                       tahunOptions.find(
-                        (option: any) =>
+                        (option: OptionNumber) =>
                           Number(option.value) === Number(field.value),
                       ) || null
                     }

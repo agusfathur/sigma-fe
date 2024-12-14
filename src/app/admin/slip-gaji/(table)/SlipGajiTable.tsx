@@ -12,8 +12,21 @@ import SettingGajiCreateForm from "../(form)/SettingGajiForm";
 import { useSettingGajiStore } from "@/store/settingGaji/settingGajiStore";
 import PembayaranGajiCreateForm from "../(form)/(pembayaran-gaji)/PembayaranGajiForm";
 import SlipGajiDetail from "./slipGajiDetail";
+import ModalToast from "@/components/custom/modal-toast";
+import { useToastStore } from "@/store/toastStore";
+
+interface Option {
+  value: string;
+  label: string;
+}
 
 const SlipGajiTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const date = new Date();
 
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
@@ -44,12 +57,8 @@ const SlipGajiTable = () => {
   );
 
   // create
-  const [tahunCreateOptions, setTahunCreateOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
-  const [bulanCreateOptions, setBulanCreateOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
+  const [tahunCreateOptions, setTahunCreateOptions] = useState<Option[]>([]);
+  const [bulanCreateOptions, setBulanCreateOptions] = useState<Option[]>([]);
 
   const [tahunCreate, setTahunCreate] = useState(Number(date.getFullYear()));
   const [bulanCreate, setBulanCreate] = useState(Number(date.getMonth() + 1));
@@ -77,7 +86,7 @@ const SlipGajiTable = () => {
     { value: string; label: string }[]
   >([]);
   const getBulanOption = () => {
-    const options = [
+    const options: Option[] = [
       {
         value: "01",
         label: "Januari",
@@ -238,6 +247,14 @@ const SlipGajiTable = () => {
 
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <div className="space-y-4">
         <h3>
           Filter : <span>{textFilter}</span>

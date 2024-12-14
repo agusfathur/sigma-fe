@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import {
   FormControl,
@@ -20,20 +20,32 @@ import {
   TypeTunjangaTetapPegawaiCreate,
 } from "./TunjangaTetapPegawaiSchema";
 import { useTunjanganTetapStore } from "@/store/tunjanganTetap/tunjanganTetapStore";
+import { useToastStore } from "@/store/toastStore";
 
 interface TunjangaTetapPegawaiCreateFormProps {
   onSuccess: () => void;
   pegawaiId: string;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function TunjangaTetapPegawaiCreateForm({
   onSuccess,
   pegawaiId,
 }: TunjangaTetapPegawaiCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
-  const [tunjanganTetapOptions, setTunjanganTetapOptions] = useState<
-    { value: number; label: string }[]
-  >([]);
+  const [tunjanganTetapOptions, setTunjanganTetapOptions] = useState<Option[]>(
+    [],
+  );
 
   const insertTunjangaTetapPegawai = useTunjanganTetapPegawaiStore(
     (state) => state.insertTunjanganTetapPegawai,
@@ -54,8 +66,7 @@ export default function TunjangaTetapPegawaiCreateForm({
     (state) => state.fetchTunjanganTetapPegawaiById,
   );
 
-  const getTunjanganTetapOptions = () => {
-    // Filter out tunjangan tetap that are already assigned
+  const getTunjanganTetapOptions = useCallback(() => {
     const availableTunjanganTetap = tunjanganTetap.filter(
       (tt) =>
         !tunjanganTetapPegawai.some(
@@ -63,16 +74,15 @@ export default function TunjangaTetapPegawaiCreateForm({
         ),
     );
 
-    // Create options from filtered tunjangan tetap
-    const options = availableTunjanganTetap.map((tunjanganTetap) => ({
+    const options: Option[] = availableTunjanganTetap.map((tunjanganTetap) => ({
       value: tunjanganTetap.id_tunjangan_tetap,
       label: `${tunjanganTetap.nama} - Rp. ${new Intl.NumberFormat(
         "id-ID",
       ).format(tunjanganTetap.nominal)}`,
     }));
 
-    setTunjanganTetapOptions(options as any);
-  };
+    setTunjanganTetapOptions(options);
+  }, [tunjanganTetap, tunjanganTetapPegawai]); // Pastikan dependensi benar
 
   const formTunjangaTetapPegawai = useForm<TypeTunjangaTetapPegawaiCreate>({
     resolver: zodResolver(TunjangaTetapPegawaiCreateSchema),
@@ -90,19 +100,34 @@ export default function TunjangaTetapPegawaiCreateForm({
         pegawai_id: pegawaiId,
       });
       formTunjangaTetapPegawai.reset();
+
+      setToast({
+        isOpen: true,
+        message: "Data Tunjangan Tetap Pegawai Berhasil Ditambahkan",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data Tunjangan Tetap Pegawai Gagal Ditambahkan",
+        type: "error",
+      });
       console.error("Error Insert THR:", error);
     } finally {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     fetchTunjanganTetap();
-    getTunjanganTetapOptions();
     fetchTunjanganTetapPegawaiById(pegawaiId);
-  }, [fetchTunjanganTetap, fetchTunjanganTetapPegawaiById, pegawaiId]);
+    getTunjanganTetapOptions();
+  }, [
+    fetchTunjanganTetap,
+    fetchTunjanganTetapPegawaiById,
+    getTunjanganTetapOptions,
+    pegawaiId,
+  ]);
 
   return (
     <>
@@ -140,7 +165,7 @@ export default function TunjangaTetapPegawaiCreateForm({
                     }
                     value={
                       tunjanganTetapOptions.find(
-                        (option: any) =>
+                        (option: Option) =>
                           String(option.value) === String(field.value),
                       ) || null
                     }

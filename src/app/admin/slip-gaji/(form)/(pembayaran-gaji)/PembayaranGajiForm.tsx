@@ -23,14 +23,26 @@ import { useSlipGajiStore } from "@/store/slipGaji/slipGajiStore";
 import { usePembayaranGajiStore } from "@/store/pembayaranGaji/pembayaranGajiStore";
 import { Input } from "@/components/ui/input";
 import { useSession } from "next-auth/react";
+import { useToastStore } from "@/store/toastStore";
 
 interface PembayaranGajiCreateFormProps {
   onSuccess: () => void;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function PembayaranGajiCreateForm({
   onSuccess,
 }: PembayaranGajiCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const { data: session }: { data: any } = useSession();
@@ -50,7 +62,7 @@ export default function PembayaranGajiCreateForm({
     (state) => state.updatePembayaranGaji,
   );
 
-  const metodePembayaranOptions = [
+  const metodePembayaranOptions: Option[] = [
     {
       value: "transfer",
       label: "transfer",
@@ -85,12 +97,22 @@ export default function PembayaranGajiCreateForm({
           user_id: session?.user?.id,
           slip_gaji_id: slipGajiData?.id_slip_gaji as string,
         });
+        setToast({
+          isOpen: true,
+          type: "success",
+          message: "Buat Pembayaran Gaji Berhasil",
+        });
       } else {
         await createPembayaranGaji({
           ...data,
           tanggal_pembayaran: data.tanggal_pembayaran + "T00:00:00.000Z",
           user_id: session?.user?.id,
           slip_gaji_id: slipGajiData?.id_slip_gaji as string,
+        });
+        setToast({
+          isOpen: true,
+          type: "success",
+          message: "Update Pembayaran Gaji Berhasil",
         });
       }
       formPembayaranGaji.reset();
@@ -117,7 +139,7 @@ export default function PembayaranGajiCreateForm({
               render={({ field }) => (
                 <FormItem className="space-y-1">
                   <FormLabel className="text-sm lg:text-base">
-                    Tunjangan Kehadiran
+                    Tanggal Pembayaran
                   </FormLabel>
                   <Input {...field} type="date" />
                   <FormControl></FormControl>

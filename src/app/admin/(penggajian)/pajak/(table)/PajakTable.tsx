@@ -9,8 +9,17 @@ import { usePajakStore } from "@/store/pajak/pajakStore";
 import { PajakColumns } from "./PajakColumns";
 import PajakCreateForm from "../(form)/PajakCreateForm";
 import PajakEditForm from "../(form)/PajakEditForm";
+import { useToastStore } from "@/store/toastStore";
+import ModalToast from "@/components/custom/modal-toast";
 
 const PajakTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
+
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
 
   const pajaks = usePajakStore((state) => state.pajak);
@@ -32,8 +41,18 @@ const PajakTable = () => {
   const handleDelete = async () => {
     try {
       await deletePajak(pajakData?.id_pajak as string);
+      setToast({
+        isOpen: true,
+        message: "Data pajak berhasil dihapus",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data pajak gagal dihapus",
+        type: "error",
+      });
       console.log(error);
     }
   };
@@ -56,6 +75,14 @@ const PajakTable = () => {
 
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <div className="space-y-4">
         <DataTable
           data={pajaks}

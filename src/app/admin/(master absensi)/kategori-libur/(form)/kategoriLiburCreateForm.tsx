@@ -18,6 +18,7 @@ import {
   TypeKategoriLiburCreate,
 } from "./kategoriLiburSchema";
 import { useKategoriLiburStore } from "@/store/kategoriLibur/kategoriLiburStore";
+import { useToastStore } from "@/store/toastStore";
 
 interface KategoriLiburCreateFormProps {
   onSuccess: () => void;
@@ -26,6 +27,12 @@ interface KategoriLiburCreateFormProps {
 export default function KategoriLiburCreateForm({
   onSuccess,
 }: KategoriLiburCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const insertKategoriLibur = useKategoriLiburStore(
@@ -45,9 +52,19 @@ export default function KategoriLiburCreateForm({
       const res = await insertKategoriLibur(data);
       if (!res.status === false) {
         formKategoriLibur.reset();
+        setToast({
+          isOpen: true,
+          message: "Data Kategori Libur Berhasil Ditambahkan",
+          type: "success",
+        });
         onSuccess();
       }
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data Kategori Libur Gagal Ditambahkan",
+        type: "error",
+      });
       console.error("Error Insert Jabatan:", error);
     } finally {
       setIsLoading(false);

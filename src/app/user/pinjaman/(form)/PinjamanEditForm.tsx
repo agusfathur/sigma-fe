@@ -21,6 +21,7 @@ import {
   TypePinjamanCreate,
   TypePinjamanUpdate,
 } from "./PinjamanSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface PinjamanEditFormProps {
   onSuccess: () => void;
@@ -33,6 +34,12 @@ interface Option {
 
 export default function PinjamanEditForm({ onSuccess }: PinjamanEditFormProps) {
   const { data: session } = useSession();
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const updatePinjaman = usePinjamanStore((state) => state.updatePinjaman);
@@ -61,7 +68,17 @@ export default function PinjamanEditForm({ onSuccess }: PinjamanEditFormProps) {
       });
       formPinjaman.reset();
       onSuccess();
+      setToast({
+        isOpen: true,
+        message: "Berhasil Update Pinjaman",
+        type: "success",
+      });
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Gagal Update Pinjaman",
+        type: "error",
+      });
       console.error("Error Insert Tunjangan Bonus:", error);
     } finally {
       setIsLoading(false);

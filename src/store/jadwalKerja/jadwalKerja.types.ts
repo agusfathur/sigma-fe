@@ -15,3 +15,10 @@ export type JadwalKerjaCreate = {
   shift_id: string;
   tanggal: string;
 };
+
+export type JadwalKerjaUpdate = {
+  id_jadwal: string;
+  pegawai_id: string;
+  shift_id: string;
+  tanggal: string;
+};

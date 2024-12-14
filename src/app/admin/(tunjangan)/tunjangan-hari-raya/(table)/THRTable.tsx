@@ -11,8 +11,16 @@ import { useTHRStore } from "@/store/THR/THRStore";
 import THRCreateForm from "../(form)/THRCreateForm";
 import ModalDelete from "@/components/custom/modal-delete";
 import THREditForm from "../(form)/THREditForm";
+import { useToastStore } from "@/store/toastStore";
+import ModalToast from "@/components/custom/modal-toast";
 
 const THRTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const tunjanganHariRaya = useTHRStore((state) => state.tunjanganHariRaya);
   const fetchTHRByFilter = useTHRStore((state) => state.fetchTHRByFilter);
   const thrData = useTHRStore((state) => state.THRData);
@@ -75,8 +83,18 @@ const THRTable = () => {
   const handleDelete = async () => {
     try {
       await deleteTHR(thrData?.id_thr as string);
+      setToast({
+        isOpen: true,
+        message: "Data THR berhasil dihapus",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data THR gagal dihapus",
+        type: "error",
+      });
       console.log(error);
     }
   };
@@ -100,6 +118,14 @@ const THRTable = () => {
 
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <div className="space-y-4">
         <h3>
           Filter : <span>{textFilter}</span>

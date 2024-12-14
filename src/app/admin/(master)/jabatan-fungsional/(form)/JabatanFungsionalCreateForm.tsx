@@ -17,6 +17,8 @@ import {
   TypeJabatanFungsionalCreate,
 } from "./JabatanFungsionalSchema";
 import { useJabatanFungsionalStore } from "@/store/jabatanFungsional/jabatanFungsionalStore";
+import { useToastStore } from "@/store/toastStore";
+import { set } from "zod";
 
 interface JabatanFungsionalCreateFormProps {
   onSuccess: () => void;
@@ -25,6 +27,12 @@ interface JabatanFungsionalCreateFormProps {
 export default function JabatanFungsionalCreateForm({
   onSuccess,
 }: JabatanFungsionalCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const insertJabatanFunsional = useJabatanFungsionalStore(
@@ -44,8 +52,18 @@ export default function JabatanFungsionalCreateForm({
     try {
       const res = await insertJabatanFunsional(data);
       formJabatan.reset();
+      setToast({
+        isOpen: true,
+        message: "Jabatan Fungsional Berhasil Ditambahkan",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Jabatan Fungsional Gagal Ditambahkan",
+        type: "error",
+      });
       console.error("Error Insert Jabatan:", error);
     } finally {
       setIsLoading(false);

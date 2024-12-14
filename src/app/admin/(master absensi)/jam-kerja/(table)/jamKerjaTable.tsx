@@ -8,8 +8,17 @@ import { useJamKerjaStore } from "@/store/jamKerja/jamKerjaStore";
 import { jamKerjaColumns } from "./jamKerjaColumns";
 import JamKerjaCreateForm from "../(form)/jamKerjaCreateForm";
 import JamKerjaUpdateForm from "../(form)/jamKerjaEditForm";
+import { useToastStore } from "@/store/toastStore";
+import ModalToast from "@/components/custom/modal-toast";
 
 const JamKerjaTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
+
   const fetchJamKerja = useJamKerjaStore((state) => state.fetchJamKerja);
   const jamKerjas = useJamKerjaStore((state) => state.jamKerja);
 
@@ -49,8 +58,18 @@ const JamKerjaTable = () => {
     if (!jamKerjaData) return;
     try {
       deleteJamKerja(jamKerjaData?.id_shift_kerja);
+      setToast({
+        isOpen: true,
+        message: "Data jam kerja berhasil dihapus",
+        type: "success",
+      });
       fetchJamKerja();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data jam kerja gagal dihapus",
+        type: "error",
+      });
       console.log(error);
     } finally {
       setIsModalDeleteOpen(false);
@@ -58,6 +77,14 @@ const JamKerjaTable = () => {
   };
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <DataTable
         data={jamKerjas}
         columns={jamKerjaColumns}

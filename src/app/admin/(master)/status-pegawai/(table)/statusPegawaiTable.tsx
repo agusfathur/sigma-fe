@@ -8,8 +8,17 @@ import ModalDelete from "@/components/custom/modal-delete";
 import { useStatusKepegawaianStore } from "@/store/statusKepegawaian/statusKepegawaianStore";
 import StatusPegawaiCreateForm from "../(form)/statusPegawaiCreateForm";
 import StatusPegawaiUpdateForm from "../(form)/statusPegawaiEditForm";
+import ModalToast from "@/components/custom/modal-toast";
+import { useToastStore } from "@/store/toastStore";
 
 const StatusPegawaiTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
+
   const fetchStatusKepegawaian = useStatusKepegawaianStore(
     (state) => state.fetchStatusKepegawaian,
   );
@@ -55,11 +64,24 @@ const StatusPegawaiTable = () => {
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!statusKepegawaianData) return;
     try {
-      deleteStatusKepegawaian(statusKepegawaianData?.id_status_kepegawaian);
+      await deleteStatusKepegawaian(
+        statusKepegawaianData?.id_status_kepegawaian,
+      );
+      setToast({
+        isOpen: true,
+        message: "Status Pegawai Berhasil Dihapus",
+        type: "success",
+      });
+      onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Status Pegawai Gagal Dihapus",
+        type: "error",
+      });
       console.log(error);
     } finally {
       setIsModalDeleteOpen(false);
@@ -67,6 +89,14 @@ const StatusPegawaiTable = () => {
   };
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <DataTable
         data={statusKepegawaians}
         columns={statusPegawaiColumns}

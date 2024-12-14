@@ -16,6 +16,7 @@ interface AbsensiState {
     userId: string,
     filter: string,
   ) => Promise<any>;
+  fetchPermohonanIzinByTahun: (tahun: string, userId: string) => Promise<any>;
   insertPermohonanIzin: (permohonanIzin: PermohonanIzinCreate) => Promise<any>;
   updateStatusPermohonanIzin: (
     lemburStatus: string,
@@ -93,6 +94,23 @@ export const usePermohonanIzinStore = create<AbsensiState>((set, get) => ({
       );
 
       set({ permohonanIzin: res.data.data });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  fetchPermohonanIzinByTahun: async (tahun: string, userId: string) => {
+    try {
+      const pegawai = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai/user/${userId}`,
+      );
+
+      const pegawaiId = pegawai.data.data.id_pegawai;
+
+      const res = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/permohonan-izin/pegawai/${pegawaiId}?tahun=${tahun}`,
+      );
+
+      return res.data.data;
     } catch (error) {
       console.log(error);
     }

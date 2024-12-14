@@ -20,12 +20,24 @@ import {
 } from "./TunjanganBonusSchema";
 import { usePegawaiStore } from "@/store/pegawai/pegawaiStore";
 import { useTunjanganBonusStore } from "@/store/tunjanganBonus/tunjanganBonusStore";
+import { useToastStore } from "@/store/toastStore";
 
 interface THREditFormProps {
   onSuccess: () => void;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function THREditForm({ onSuccess }: THREditFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const tunjanganBonusData = useTunjanganBonusStore(
@@ -38,7 +50,7 @@ export default function THREditForm({ onSuccess }: THREditFormProps) {
   const pegawais = usePegawaiStore((state) => state.pegawai);
   const fetchPegawai = usePegawaiStore((state) => state.fetchPegawai);
 
-  const pegawaiOptions = pegawais.map((pegawai) => ({
+  const pegawaiOptions: Option[] = pegawais.map((pegawai) => ({
     value: pegawai.id_pegawai,
     label: pegawai.nama,
   }));
@@ -62,9 +74,19 @@ export default function THREditForm({ onSuccess }: THREditFormProps) {
         id_tunjangan_bonus: tunjanganBonusData?.id_tunjangan_bonus as string,
         tanggal: data.tanggal + "T00:00:00.000Z",
       });
+      setToast({
+        isOpen: true,
+        message: "Data tunjangan bonus berhasil diubah",
+        type: "success",
+      });
       formTunjanganBonus.reset();
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data tunjangan bonus gagal diubah",
+        type: "error",
+      });
       console.error("Error Insert Jabatan:", error);
     } finally {
       setIsLoading(false);
@@ -114,7 +136,7 @@ export default function THREditForm({ onSuccess }: THREditFormProps) {
                     }
                     value={
                       pegawaiOptions.find(
-                        (option: any) =>
+                        (option: Option) =>
                           String(option.value) === String(field.value),
                       ) || null
                     }

@@ -56,6 +56,7 @@ export const usePegawaiStore = create<PegawaiState>((set, get) => ({
     formData.append("agama", pegawai.agama);
     formData.append("alamat", pegawai.alamat);
     formData.append("tenaga", pegawai.tenaga);
+    formData.append("status_tetap", pegawai.status_tetap);
     formData.append("jabatan_id", pegawai.jabatan_id);
     formData.append("status_kepegawaian_id", pegawai.status_kepegawaian_id);
     const riwayatPendidikan = pegawai.riwayat_pendidikan || []; // Default to empty array if undefined
@@ -136,6 +137,8 @@ export const usePegawaiStore = create<PegawaiState>((set, get) => ({
     if (pegawai.tenaga) {
       formData.append("tenaga", pegawai.tenaga);
     }
+    if (pegawai.status_tetap)
+      formData.append("status_tetap", pegawai.status_tetap);
     if (pegawai.jabatan_id) {
       formData.append("jabatan_id", pegawai.jabatan_id || "");
     }

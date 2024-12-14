@@ -16,6 +16,7 @@ import { Button } from "@/components/custom/button";
 import { useSession } from "next-auth/react";
 import { usePinjamanStore } from "@/store/pinjaman/pinjamanStore";
 import { PinjamanCreateSchema, TypePinjamanCreate } from "./PinjamanSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface PinjamanCreateFormProps {
   onSuccess: () => void;
@@ -30,6 +31,12 @@ export default function PinjamanCreateForm({
   onSuccess,
 }: PinjamanCreateFormProps) {
   const { data: session } = useSession();
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const insertPinjaman = usePinjamanStore((state) => state.insertPinjaman);
@@ -56,8 +63,18 @@ export default function PinjamanCreateForm({
       });
       formPinjaman.reset();
       onSuccess();
+      setToast({
+        isOpen: true,
+        message: "Berhasil Menambah Pinjaman",
+        type: "success",
+      });
     } catch (error) {
-      console.error("Error Insert Tunjangan Bonus:", error);
+      setToast({
+        isOpen: true,
+        message: "Gagal Menambah Pinjaman",
+        type: "error",
+      });
+      console.error("Error Insert Pinjama:", error);
     } finally {
       setIsLoading(false);
     }

@@ -36,7 +36,7 @@ export default function UserSidebar({
   return (
     <aside
       className={cn(
-        `fixed left-0 right-0 top-0 z-50 w-full border-r-2 border-slate-300 shadow-lg shadow-white transition-[width] dark:shadow-lg md:bottom-0 md:right-auto md:h-svh md:shadow-2xl md:dark:shadow-white ${isCollapsed ? "md:w-14" : "md:w-64"}`,
+        `fixed left-0 right-0 top-0 z-50 w-full border-r-2 border-slate-300 shadow-lg shadow-white transition-[width] duration-500 dark:shadow-lg md:bottom-0 md:right-auto md:h-svh md:shadow-2xl md:dark:shadow-white ${isCollapsed ? "md:w-14" : "md:w-64"}`,
         className,
       )}
     >
@@ -97,7 +97,7 @@ export default function UserSidebar({
               className={`flex flex-col justify-end truncate ${isCollapsed ? "invisible w-0" : "visible w-auto"}`}
             >
               <span className="font-medium">
-                {settingApp.singkatan_sistem || "Shadcn Admin"}
+                {settingApp?.singkatan_sistem || "Shadcn Admin"}
               </span>
               <span className="text-xs">MI NU Hidayatul Mubtadiin</span>
             </div>

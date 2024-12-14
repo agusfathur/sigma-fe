@@ -22,19 +22,30 @@ import {
   UserUpdateSchema,
 } from "./UserSchema";
 import Image from "next/image";
+import { useToastStore } from "@/store/toastStore";
 
 interface UserEditFormProps {
   onSuccess: () => void;
 }
+interface Option {
+  value: string;
+  label: string;
+}
 
 export default function UserEditForm({ onSuccess }: UserEditFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const updateUser = useUserStore((state) => state.updateUser);
 
   const userData = useUserStore((state) => state.userData);
 
-  const roleOptions = [
+  const roleOptions: Option[] = [
     {
       value: "admin",
       label: "Admin",
@@ -93,6 +104,11 @@ export default function UserEditForm({ onSuccess }: UserEditFormProps) {
         await updateUser(data);
       }
       formUser.reset();
+      setToast({
+        isOpen: true,
+        message: "User berhasil diupdate",
+        type: "success",
+      });
       onSuccess();
     } catch (error: Error | any) {
       console.error("Error Insert User Create:", error);

@@ -5,12 +5,19 @@ import { useEffect, useState } from "react";
 import { kategoriLiburColumns } from "./kategoriLiburColumns";
 import Modal from "@/components/custom/modal";
 import ModalDelete from "@/components/custom/modal-delete";
-import StatusPegawaiUpdateForm from "../(form)/kategoriLiburEditForm";
 import { useKategoriLiburStore } from "@/store/kategoriLibur/kategoriLiburStore";
 import KategoriLiburCreateForm from "../(form)/kategoriLiburCreateForm";
 import KategoriLiburUpdateForm from "../(form)/kategoriLiburEditForm";
+import ModalToast from "@/components/custom/modal-toast";
+import { useToastStore } from "@/store/toastStore";
 
 const KategoriLiburTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const fetchKategoriLibur = useKategoriLiburStore(
     (state) => state.fetchKategoriLibur,
   );
@@ -67,6 +74,14 @@ const KategoriLiburTable = () => {
   };
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <DataTable
         data={kategoriLiburs}
         columns={kategoriLiburColumns}

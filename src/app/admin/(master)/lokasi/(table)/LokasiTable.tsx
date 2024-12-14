@@ -9,8 +9,16 @@ import { useLokasiStore } from "@/store/lokasi/lokasiStore";
 import LokasiDetail from "../(form)/LokasiDetail";
 import LokasiCreateForm from "../(form)/LokasiCreateForm";
 import LokasiUpdateForm from "../(form)/LokasiEditForm";
+import { useToastStore } from "@/store/toastStore";
+import ModalToast from "@/components/custom/modal-toast";
 
 const LokasiTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const fetchLokasi = useLokasiStore((state) => state.fetchLokasi);
   const lokasis = useLokasiStore((state) => state.lokasi);
 
@@ -49,11 +57,21 @@ const LokasiTable = () => {
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!lokasiData) return;
     try {
-      deleteLokasi(lokasiData?.id_lokasi);
+      await deleteLokasi(lokasiData?.id_lokasi);
+      setToast({
+        isOpen: true,
+        message: "Lokasi Berhasil Dihapus",
+        type: "success",
+      });
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Lokasi Gagal Dihapus",
+        type: "error",
+      });
       console.log(error);
     } finally {
       setIsModalDeleteOpen(false);
@@ -61,6 +79,14 @@ const LokasiTable = () => {
   };
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <DataTable
         data={lokasis}
         columns={lokasiColumns}

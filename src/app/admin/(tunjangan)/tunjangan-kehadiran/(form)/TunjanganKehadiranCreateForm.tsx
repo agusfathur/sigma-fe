@@ -19,23 +19,33 @@ import {
   TunjanganKehadiranCreateSchema,
   TypeTunjanganKehadiranCreate,
 } from "./TunjanganKehadiranSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface TunjanganKehadiranCreateFormProps {
   onSuccess: () => void;
 }
 
+interface OptionNumber {
+  value: number;
+  label: string;
+}
+
 export default function TunjanganKehadiranCreateForm({
   onSuccess,
 }: TunjanganKehadiranCreateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const insertTunjanganKehadiran = useTunjanganKehadiranStore(
     (state) => state.insertTunjanganKehadiran,
   );
 
-  const [tahunOptions, setTahunOptions] = useState<
-    { value: number; label: string }[]
-  >([]);
+  const [tahunOptions, setTahunOptions] = useState<OptionNumber[]>([]);
 
   const getTahunOption = () => {
     const tahun = new Date().getFullYear(); // Mendapatkan tahun saat ini
@@ -60,9 +70,19 @@ export default function TunjanganKehadiranCreateForm({
     try {
       const res = await insertTunjanganKehadiran(data);
       formTunjanganKehadiran.reset();
+      setToast({
+        isOpen: true,
+        message: "Data tunjangan kehadiran berhasil ditambahkan",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
-      console.error("Error Insert THR:", error);
+      setToast({
+        isOpen: true,
+        message: "Data tunjangan kehadiran gagal ditambahkan",
+        type: "error",
+      });
+      console.error("Error Insert Tunjangan kehadiran:", error);
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +128,7 @@ export default function TunjanganKehadiranCreateForm({
                     }
                     value={
                       tahunOptions.find(
-                        (option: any) =>
+                        (option: OptionNumber) =>
                           Number(option.value) === Number(field.value),
                       ) || null
                     }

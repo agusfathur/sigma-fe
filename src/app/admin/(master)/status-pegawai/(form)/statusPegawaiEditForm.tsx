@@ -17,6 +17,7 @@ import {
   StatusPegawaiUpdateSchema,
   TypeStatusPegawaiUpdate,
 } from "./statusPegawaiSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface StatusPegawaiUpdateFormProps {
   onSuccess: () => void;
@@ -25,6 +26,12 @@ interface StatusPegawaiUpdateFormProps {
 export default function StatusPegawaiUpdateForm({
   onSuccess,
 }: StatusPegawaiUpdateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const statusKepegawaianData = useStatusKepegawaianStore(
@@ -47,9 +54,19 @@ export default function StatusPegawaiUpdateForm({
     setIsLoading(true);
     try {
       const res = await updateStatusKepegawaian(data);
+      setToast({
+        isOpen: true,
+        message: "Status Pegawai berhasil diubah",
+        type: "success",
+      });
       formStatusPegawai.reset();
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Status Pegawai gagal diubah",
+        type: "error",
+      });
       console.error("Error Update Status Pegawai:", error);
     } finally {
       setIsLoading(false);

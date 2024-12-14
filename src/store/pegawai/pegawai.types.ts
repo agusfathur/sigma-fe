@@ -19,6 +19,7 @@ export type Pegawai = {
   agama: string;
   alamat: string;
   tenaga: string;
+  status_tetap: string;
   jabatan_id: string;
   status_kepegawaian_id: string;
   riwayat_pendidikan: string[];
@@ -58,6 +59,7 @@ export type PegawaiCreate = {
   agama: string;
   alamat: string;
   tenaga: string;
+  status_tetap: string;
   jabatan_id: string;
   status_kepegawaian_id: string;
   riwayat_pendidikan?: string[];
@@ -90,6 +92,7 @@ export type PegawaiUpdate = {
   agama: string;
   alamat: string;
   tenaga: string;
+  status_tetap: string;
   jabatan_id: string;
   status_kepegawaian_id: string;
   riwayat_pendidikan?: string[];

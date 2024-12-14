@@ -7,8 +7,16 @@ import Modal from "@/components/custom/modal";
 import JabatanCreateForm from "../(form)/JabatanCreateForm";
 import ModalDelete from "@/components/custom/modal-delete";
 import JabatanEditForm from "../(form)/JabatanEditForm";
+import { useToastStore } from "@/store/toastStore";
+import ModalToast from "@/components/custom/modal-toast";
 
 const JabatanTable = () => {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const fetchJabatan = useJabatanStore((state) => state.fetchJabatan);
   const jabatans = useJabatanStore((state) => state.jabatan);
   const jabatanData = useJabatanStore((state) => state.jabatanData);
@@ -45,6 +53,12 @@ const JabatanTable = () => {
     if (!jabatanData) return;
     try {
       await deleteJabatan(jabatanData?.id_jabatan);
+      setToast({
+        isOpen: true,
+        type: "success",
+        message: "Jabatan deleted successfully",
+      });
+      await onSuccess();
     } catch (error) {
       console.log(error);
     } finally {
@@ -54,6 +68,14 @@ const JabatanTable = () => {
 
   return (
     <>
+      <ModalToast
+        isOpen={toastOpen}
+        message={message}
+        type={toastType}
+        onClose={() =>
+          setToast({ isOpen: false, message: "", type: toastType })
+        }
+      />
       <DataTable
         data={jabatans}
         columns={jabatanColumns}

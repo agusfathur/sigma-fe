@@ -17,6 +17,7 @@ import {
   KategoriLiburUpdateSchema,
   TypeKategoriLiburUpdate,
 } from "./kategoriLiburSchema";
+import { useToastStore } from "@/store/toastStore";
 
 interface KategoriLiburUpdateFormProps {
   onSuccess: () => void;
@@ -25,6 +26,12 @@ interface KategoriLiburUpdateFormProps {
 export default function KategoriLiburUpdateForm({
   onSuccess,
 }: KategoriLiburUpdateFormProps) {
+  const {
+    isOpen: toastOpen,
+    message,
+    type: toastType,
+    setToast,
+  } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const kategoriLiburData = useKategoriLiburStore(
@@ -48,8 +55,18 @@ export default function KategoriLiburUpdateForm({
     try {
       const res = await updateKategoriLibur(data);
       formKategoriLibur.reset();
+      setToast({
+        isOpen: true,
+        message: "Data Kategori Libur berhasil diubah",
+        type: "success",
+      });
       onSuccess();
     } catch (error) {
+      setToast({
+        isOpen: true,
+        message: "Data Kategori Libur gagal diubah",
+        type: "error",
+      });
       console.error("Error Update Kategori Libur:", error);
     } finally {
       setIsLoading(false);
