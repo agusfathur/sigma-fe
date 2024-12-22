@@ -8,6 +8,8 @@ interface DataTableToolbarProps<TData> {
   onClickTambah?: () => void;
   onFilterChange?: () => void;
   onSettingChange?: () => void;
+  onPrint?: () => void;
+  onShowPDF?: () => void;
 }
 
 export function DataTableToolbar<TData>({
@@ -15,6 +17,8 @@ export function DataTableToolbar<TData>({
   onClickTambah,
   onFilterChange,
   onSettingChange,
+  onPrint,
+  onShowPDF,
 }: DataTableToolbarProps<TData>) {
   return (
     <div className="flex items-center justify-between">
@@ -45,6 +49,27 @@ export function DataTableToolbar<TData>({
               onClick={() => onFilterChange && onFilterChange()}
             >
               Filter
+            </Button>
+          )}
+
+          {onShowPDF && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto h-8 justify-end border-black px-2 text-sm dark:border-white lg:px-3"
+              onClick={() => onShowPDF && onShowPDF()}
+            >
+              Show PDF
+            </Button>
+          )}
+          {onPrint && (
+            <Button
+              variant="default"
+              size="sm"
+              className="ml-auto h-8 justify-end border-black px-2 text-sm dark:border-white lg:px-3"
+              onClick={() => onPrint && onPrint()}
+            >
+              Print
             </Button>
           )}
           {onSettingChange && (

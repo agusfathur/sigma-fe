@@ -17,8 +17,8 @@ export default function ContentSection({
         <h3 className="text-lg font-medium">{title}</h3>
         <p className="text-sm text-muted-foreground">{desc}</p>
       </div>
-      <Separator className="my-4 flex-none" />
-      <div className="-mx-4 flex-1 overflow-auto scroll-smooth px-4 md:pb-16">
+      <Separator className="my-2 flex-none" />
+      <div className="-mx-4 flex-1 overflow-auto scroll-smooth px-4 md:pb-10">
         <div className="w-full">{children}</div>
       </div>
     </div>

@@ -283,7 +283,7 @@ const LemburTable = () => {
               onChange={(e) => setFilterTanggal(e.target.value)}
               value={filterTanggal}
             />
-            <h2 className="mb-2 text-sm md:text-base">Tahun</h2>
+            <h2 className="mb-2 text-sm md:text-base">Bulan</h2>
             <select
               value={filterBulan}
               onChange={(e) => setFilterBulan(e.target.value)}

@@ -19,10 +19,10 @@ export type UserCreate = {
 
 export type UserUpdate = {
   id_user: string;
-  name: string;
-  username: string;
-  password: string;
+  name?: string;
+  username?: string;
+  password?: string;
   image?: File;
-  email: string;
-  role: string;
+  email?: string;
+  role?: string;
 };

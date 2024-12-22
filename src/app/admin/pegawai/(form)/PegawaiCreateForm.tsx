@@ -249,7 +249,7 @@ export default function PegawaiCreateForm({
         });
       }
     } catch (error: Error | any) {
-      console.error("Error Insert Jadwal Kerja:", error);
+      console.error("Error Insert Pegawai:", error);
       const errMsg = error.response.data.message;
       if (errMsg) {
         setErrorMessage({

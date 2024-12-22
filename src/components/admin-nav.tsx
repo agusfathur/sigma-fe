@@ -25,8 +25,7 @@ export function AdminNav() {
         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`,
       );
       if (logout.data.status === true) {
-        await signOut({ redirect: false });
-        router.push("/");
+        await signOut({ redirect: true });
       }
     } catch (error) {
       console.error(error);

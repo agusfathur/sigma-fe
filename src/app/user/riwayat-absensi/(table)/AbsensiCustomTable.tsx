@@ -53,6 +53,7 @@ const AbsensiCustomTable = ({
   // Contoh penggunaan:
   const hadirCount = countStatusAbsen("hadir");
   const izinCount = countStatusAbsen("izin");
+  const countCuti = countStatusAbsen("cuti");
   const terlambatCount = countStatusAbsen("terlambat");
   const tidakHadirCount = countStatusAbsen("tidak_hadir");
   return (
@@ -72,7 +73,7 @@ const AbsensiCustomTable = ({
           Izin : <span className="font-bold">{izinCount}</span>
         </p>
         <p className="rounded-xl bg-cyan-100 px-2.5 py-1 text-sm font-medium text-cyan-950">
-          Cuti : <span className="font-bold">{izinCount}</span>
+          Cuti : <span className="font-bold">{countCuti}</span>
         </p>
       </div>
       <DataTable

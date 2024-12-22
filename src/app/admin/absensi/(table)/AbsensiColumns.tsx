@@ -9,6 +9,8 @@ import { useAbsensiStore } from "@/store/absensi/absensiStore";
 import { IconEye } from "@tabler/icons-react";
 import { Button } from "@/components/custom/button";
 import { useJamKerjaStore } from "@/store/jamKerja/jamKerjaStore";
+import { useState } from "react";
+import Modal from "@/components/custom/modal";
 
 export const absensiColumns: ColumnDef<Absensi>[] = [
   {
@@ -24,7 +26,7 @@ export const absensiColumns: ColumnDef<Absensi>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Pegawai" />
     ),
-    cell: ({ row }) => <span>{row.original.pegawai.nama}</span>,
+    cell: ({ row }) => <span>{row.original.pegawai?.nama}</span>,
   },
   {
     accessorKey: "tanggal_absen",
@@ -73,12 +75,7 @@ export const absensiColumns: ColumnDef<Absensi>[] = [
     cell: ({ row }) => (
       <>
         {row.original.foto_masuk && (
-          <Image
-            src={row.original.foto_masuk}
-            width={50}
-            height={50}
-            alt="image pegawai"
-          />
+          <DetailImage imageSrc={row.original.foto_masuk} type="Masuk" />
         )}
       </>
     ),
@@ -91,12 +88,7 @@ export const absensiColumns: ColumnDef<Absensi>[] = [
     cell: ({ row }) => (
       <>
         {row.original.foto_pulang && (
-          <Image
-            src={row.original.foto_pulang}
-            width={50}
-            height={50}
-            alt="image pegawai"
-          />
+          <DetailImage imageSrc={row.original.foto_pulang} type="Pulang" />
         )}
       </>
     ),
@@ -110,12 +102,54 @@ export const absensiColumns: ColumnDef<Absensi>[] = [
     enableSorting: false,
   },
   {
-    id: "actions",
+    accessorKey: "status_absen",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Action" />
+      <DataTableColumnHeader column={column} title="Status" />
     ),
-    cell: ({ row }) => <AbsensiActions row={row} />,
+    cell: ({ row }) => {
+      let color: string;
+      let status: string;
+      switch (row.original.status_absen) {
+        case "izin":
+          status = "Izin";
+          color = "bg-blue-200 text-blue-900";
+          break;
+        case "cuti":
+          status = "Cuti";
+          color = "bg-cyan-200 text-cyan-900";
+          break;
+        case "tidak_hadir":
+          status = "Tidak Hadir";
+          color = "bg-red-200 text-red-900";
+          break;
+        case "hadir":
+          status = "Hadir";
+          color = "bg-green-200 text-green-900";
+          break;
+        case "terlambat":
+          status = "Terlambat";
+          color = "bg-yellow-200 text-yellow-900";
+        default:
+          status = "Unknown";
+          color = "bg-gray-200 text-gray-900";
+          break;
+      }
+      return (
+        <span
+          className={`rounded-2xl px-2.5 py-1 text-center text-xs font-bold ${color} capitalize`}
+        >
+          {status}
+        </span>
+      );
+    },
   },
+  // {
+  //   id: "actions",
+  //   header: ({ column }) => (
+  //     <DataTableColumnHeader column={column} title="Action" />
+  //   ),
+  //   cell: ({ row }) => <AbsensiActions row={row} />,
+  // },
 ];
 
 const JadwalCell = ({ row }: any) => {
@@ -150,5 +184,42 @@ const KoordinatCell = ({ row }: any) => {
       <span className="sr-only">Detail</span>
       <IconEye className="h-4 w-4" />
     </Button>
+  );
+};
+
+export const DetailImage = ({
+  imageSrc,
+  type,
+}: {
+  imageSrc: string;
+  type?: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <>
+      <Image
+        onClick={() => setIsOpen(true)}
+        src={imageSrc}
+        width={65}
+        height={65}
+        alt="image pegawai"
+        className="rounded"
+      />
+      <Modal
+        textHeader={`Detail Foto Absensi ${type ?? ""}`}
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+      >
+        <div className="flex justify-center">
+          <Image
+            src={imageSrc}
+            width={400}
+            height={400}
+            alt="image pegawai"
+            className="rounded"
+          />
+        </div>
+      </Modal>
+    </>
   );
 };

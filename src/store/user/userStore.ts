@@ -57,11 +57,11 @@ export const useUserStore = create<UserState>((set, get) => ({
   },
   updateUser: async (user: UserUpdate) => {
     const formData = new FormData();
-    formData.append("name", user.name);
-    formData.append("email", user.email);
-    formData.append("username", user.username);
+    if (user.name) formData.append("name", user.name);
+    if (user.email) formData.append("email", user.email);
+    if (user.username) formData.append("username", user.username);
     if (user.password) formData.append("password", user.password);
-    formData.append("role", user.role);
+    if (user.role) formData.append("role", user.role);
     if (user.image) formData.append("image", user.image);
 
     const create = await axiosJWT.put(

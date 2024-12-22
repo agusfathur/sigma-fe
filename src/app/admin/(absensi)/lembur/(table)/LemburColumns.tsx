@@ -86,7 +86,30 @@ export const lemburColumns: ColumnDef<Lembur>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
-    cell: ({ row }) => <span>{row.original.status_lembur}</span>,
+    cell: ({ row }) => {
+      let color: string;
+      switch (row.original.status_lembur) {
+        case "pending":
+          color = "bg-blue-200 text-blue-900";
+          break;
+        case "diterima":
+          color = "bg-green-200 text-green-900";
+          break;
+        case "ditolak":
+          color = "bg-red-200 text-red-900";
+          break;
+        default:
+          color = "bg-gray-200 text-gray-900";
+          break;
+      }
+      return (
+        <span
+          className={`rounded-2xl px-3 py-1 text-center text-xs font-bold ${color} capitalize`}
+        >
+          {row.original.status_lembur}
+        </span>
+      );
+    },
   },
   {
     id: "actions",

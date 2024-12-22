@@ -201,6 +201,12 @@ const PermohonanIzinTable = () => {
     await fetchPermohonanIzinByFilter(query);
   };
 
+  const handleReset = async () => {
+    setQuery(`bulan=${date.getMonth() + 1}&tahun=${date.getFullYear()}`);
+    setTextFilter(`${getMonthName(date.getMonth() + 1)} ${date.getFullYear()}`);
+    await fetchPermohonanIzinByFilter(query);
+  };
+
   const handleUpdate = async () => {
     try {
       await updateStatusPermohonanIzin(
@@ -339,11 +345,7 @@ const PermohonanIzinTable = () => {
               <Button
                 className="mr-2 mt-2 border-black"
                 variant="outline"
-                onClick={() => {
-                  setFilterTanggal("");
-                  setFilterBulan("");
-                  setFilterTahun("");
-                }}
+                onClick={handleReset}
               >
                 Reset
               </Button>

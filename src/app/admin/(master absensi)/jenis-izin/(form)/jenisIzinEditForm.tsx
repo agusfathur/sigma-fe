@@ -19,6 +19,11 @@ interface JenisIzinUpdateFormProps {
   onSuccess: () => void;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
 export default function StatusPegawaiUpdateForm({
   onSuccess,
 }: JenisIzinUpdateFormProps) {
@@ -39,7 +44,7 @@ export default function StatusPegawaiUpdateForm({
     },
   });
 
-  const categoryOptions: any = [
+  const categoryOptions: Option[] = [
     {
       value: "cuti",
       label: "Cuti",
@@ -79,7 +84,7 @@ export default function StatusPegawaiUpdateForm({
                   <Select
                     {...field}
                     options={categoryOptions}
-                    className="w-full rounded-md"
+                    className="w-full rounded-md dark:text-black"
                     classNamePrefix="react-select"
                     placeholder="Select a category"
                     theme={(theme) => ({
@@ -100,7 +105,7 @@ export default function StatusPegawaiUpdateForm({
                     }
                     value={
                       categoryOptions.find(
-                        (option: any) =>
+                        (option: Option) =>
                           String(option.value) === String(field.value),
                       ) || null
                     }

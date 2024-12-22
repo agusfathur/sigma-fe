@@ -22,6 +22,7 @@ type UserAuthFormProps = HTMLAttributes<HTMLDivElement>;
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const form = useForm<z.infer<typeof loginFormSchema>>({
@@ -34,6 +35,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const callbackUrl = "/admin/dashboard";
   async function onSubmit(data: z.infer<typeof loginFormSchema>) {
     setIsLoading(true);
+    setError("");
     try {
       const res = await signIn("credentials", {
         username: data.username,
@@ -42,12 +44,10 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       });
       if (res?.error) {
         setIsLoading(false);
-        setError("Invalid username or password");
+        setError("Username atau Password Salah");
       }
       if (!res?.error) {
         router.push(callbackUrl);
-        setIsLoading(false);
-        form.reset();
       }
     } catch (error) {
       console.log(error);
@@ -56,21 +56,37 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   }
 
   return (
-    <div className={cn("grid gap-6", className)} {...props}>
-      {error && <p className="text-red-500">{error}</p>}
+    <div
+      className={cn("my-6 grid w-[80%] gap-6 md:w-[70%]", className)}
+      {...props}
+    >
+      <div className="flex flex-col space-y-2 text-left">
+        <h1 className="text-xl font-bold tracking-tight md:text-2xl">
+          Log In Pengguna
+        </h1>
+        <p className="text-xs text-muted-foreground md:text-sm">
+          Silahkan menggunakan username dan password untuk Login
+        </p>
+      </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="grid gap-2">
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        <form method="post" onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="grid gap-2 md:gap-4">
+            {/* Username Field */}
             <FormField
               control={form.control}
               name="username"
               render={({ field }) => (
-                <FormItem className="space-y-1">
+                <FormItem className="space-y-1 md:space-y-2">
                   <FormLabel className="text-sm lg:text-base">
                     Username
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="username" {...field} />
+                    <Input
+                      placeholder="username"
+                      className="border border-slate-700"
+                      {...field}
+                    />
                   </FormControl>
                   <div className="h-2">
                     <FormMessage className="text-xs" />
@@ -78,18 +94,23 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 </FormItem>
               )}
             />
+            {/* Password Field */}
             <FormField
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem className="space-y-1">
+                <FormItem className="space-y-1 md:space-y-2">
                   <div className="flex items-center justify-between">
                     <FormLabel className="text-sm lg:text-base">
                       Password
                     </FormLabel>
                   </div>
                   <FormControl>
-                    <PasswordInput placeholder="********" {...field} />
+                    <PasswordInput
+                      placeholder="********"
+                      className="border border-slate-700"
+                      {...field}
+                    />
                   </FormControl>
                   <div className="h-2">
                     <FormMessage />
@@ -97,8 +118,14 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 </FormItem>
               )}
             />
-            <Button className="mt-4" loading={isLoading}>
-              Login
+            {/* Submit Button */}
+            <Button
+              className="mt-4 w-full rounded-3xl bg-black font-semibold text-white sm:w-auto"
+              type="submit"
+              variant={"default"}
+              loading={isLoading}
+            >
+              Log In
             </Button>
           </div>
         </form>

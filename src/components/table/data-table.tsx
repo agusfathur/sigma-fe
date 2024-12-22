@@ -33,6 +33,8 @@ interface DataTableProps<TData, TValue> {
   onClickTambah?: () => void;
   onFilterChange?: () => void;
   onSettingChange?: () => void;
+  onPrint?: () => void;
+  onShowPDF?: () => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -41,6 +43,8 @@ export function DataTable<TData, TValue>({
   onClickTambah,
   onFilterChange,
   onSettingChange,
+  onPrint,
+  onShowPDF,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -79,6 +83,8 @@ export function DataTable<TData, TValue>({
         onFilterChange={onFilterChange}
         onSettingChange={onSettingChange}
         table={table}
+        onPrint={onPrint}
+        onShowPDF={onShowPDF}
       />
       <div className="rounded-md border">
         <Table>

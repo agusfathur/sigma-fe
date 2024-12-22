@@ -2,7 +2,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
-import { Button } from "@/components/custom/button";
 import { SlipGaji } from "@/store/slipGaji/slipGaji.types";
 import { SlipGajiActions } from "./SlipGajiActions";
 
@@ -66,22 +65,24 @@ export const SlipGajiColumns: ColumnDef<SlipGaji>[] = [
       let color = "";
       switch (variant) {
         case "dibayar":
-          color = "bg-green-600 text-white";
+          color = "bg-green-200 text-green-950";
           break;
         case "proses":
-          color = "bg-yellow-600 text-white";
+          color = "bg-yellow-200 text-yellow-950";
           break;
         case "pending":
-          color = "bg-blue-600 text-white";
+          color = "bg-blue-200 text-blue-950";
           break;
         default:
           break;
       }
 
       return (
-        <Button variant="ghost" className={color} size="sm">
+        <span
+          className={`rounded-2xl px-3 py-1 text-center text-xs font-bold ${color} capitalize`}
+        >
           {row.original.status_pembayaran}
-        </Button>
+        </span>
       );
     },
   },

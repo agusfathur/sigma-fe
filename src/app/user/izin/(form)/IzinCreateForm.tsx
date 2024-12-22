@@ -182,7 +182,7 @@ export default function IzinCreateForm({ onSuccess }: IzinCreateFormProps) {
       if (findIzin?.nama.toLowerCase().includes("tahunan")) {
         if (
           (filterJenisIzin?.jatah || 0) <
-          sumIzin.cuti + sumIzin.tidak_hadir + 10
+          sumIzin.cuti + sumIzin.tidak_hadir
         ) {
           formIzin.reset();
           onSuccess();

@@ -99,7 +99,7 @@ export default function JenisIzinCreateForm({
                   <Select
                     {...field}
                     options={categoryOptions}
-                    className="w-full rounded-md"
+                    className="w-full rounded-md dark:text-black"
                     classNamePrefix="react-select"
                     placeholder="Select a category"
                     theme={(theme) => ({

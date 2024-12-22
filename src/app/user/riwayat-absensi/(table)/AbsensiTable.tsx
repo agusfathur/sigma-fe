@@ -175,6 +175,18 @@ const AbsensiTable = () => {
     await fetchAllAbsensiByUserFilter(session?.user?.id as string, query);
   };
 
+  const handleReset = async () => {
+    setQuery(
+      `bulan=${new Date().getMonth() + 1}&tahun=${new Date().getFullYear()}`,
+    ); // Reset query ke bulan dan tahun saat ini
+    setTextFilter(
+      `${getMonthName(new Date().getMonth() + 1)} ${new Date().getFullYear()}`,
+    );
+    await fetchAllAbsensiByUserFilter(
+      session?.user?.id as string,
+      `bulan=${new Date().getMonth() + 1}&tahun=${new Date().getFullYear()}`,
+    );
+  };
 
   useEffect(() => {
     getTahunOption();
@@ -204,7 +216,7 @@ const AbsensiTable = () => {
             <h3 className="font-medium">
               Filter : <span>{textFilter}</span>
             </h3>
-           
+
             <AbsensiCustomTable
               mappedAbsensis={absensis}
               jadwals={jadwals}
@@ -270,11 +282,7 @@ const AbsensiTable = () => {
               <Button
                 className="mr-2 mt-2 border-black"
                 variant="outline"
-                onClick={() => {
-                  setFilterTanggal("");
-                  setFilterBulan("");
-                  setFilterTahun("");
-                }}
+                onClick={handleReset}
               >
                 Reset
               </Button>

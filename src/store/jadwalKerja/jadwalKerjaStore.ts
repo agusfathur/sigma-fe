@@ -10,12 +10,12 @@ import {
 interface JadwalKerjaState {
   jadwalKerja: JadwalKerja[];
   fetchJadwalKerja: () => Promise<void>;
-  insertJadwalKerja: (jadwalKerja: JadwalKerjaCreate) => Promise<any>;
+  insertJadwalKerja: (jadwalKerja: JadwalKerjaCreate) => Promise<JadwalKerja[]>;
   fetchJadwalKerjaByFilter: (filter: string) => Promise<any>;
   fetchJadwalKerjaPegawaiByFilter: (
     filter: string,
     pegawaiId: string,
-  ) => Promise<any>;
+  ) => Promise<JadwalKerja[]>;
   fetchJadwalKerjaPegawaiByUserFilter: (
     userId: string,
     filter: string,
@@ -67,6 +67,7 @@ export const useJadwalKerjaStore = create<JadwalKerjaState>((set, get) => ({
       );
 
       set({ jadwalKerja: res.data.data });
+      return res.data.data;
     } catch (error) {
       console.log(error);
     }

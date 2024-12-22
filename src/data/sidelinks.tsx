@@ -222,7 +222,21 @@ export const sidelinks: SideLink[] = [
   {
     title: "Laporan",
     label: "",
-    href: "/admin/laporan",
+    href: "",
     icon: <IconReport size={18} />,
+    sub: [
+      {
+        title: "Laporan Absensi",
+        label: "",
+        href: "/admin/laporan/absensi",
+        icon: <IconReport size={18} />,
+      },
+      {
+        title: "Laporan penggajian",
+        label: "",
+        href: "/admin/laporan/penggajian",
+        icon: <IconReport size={18} />,
+      },
+    ],
   },
 ];

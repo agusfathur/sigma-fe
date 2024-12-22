@@ -6,6 +6,7 @@ import axiosJWT from "@/lib/authJWT";
 interface PegawaiState {
   pegawai: Pegawai[];
   fetchPegawai: () => Promise<void>;
+  fetchPegawaiByFilter: (filter: string) => Promise<void>;
   insertPegawai: (pegawai: PegawaiCreate) => Promise<any>;
   updatePegawai: (pegawai: PegawaiUpdate) => Promise<any>;
   deletePegawai: (id: string) => Promise<any>;
@@ -23,15 +24,18 @@ interface PegawaiState {
 export const usePegawaiStore = create<PegawaiState>((set, get) => ({
   pegawai: [] as Pegawai[],
   fetchPegawai: async () => {
-    try {
-      const res = await axiosJWT.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai`,
-      );
+    const res = await axiosJWT.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai`,
+    );
 
-      set({ pegawai: res.data.data });
-    } catch (error) {
-      console.log(error);
-    }
+    set({ pegawai: res.data.data });
+  },
+  fetchPegawaiByFilter: async (filter: string) => {
+    const res = await axiosJWT.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/pegawai?${filter}`,
+    );
+
+    set({ pegawai: res.data.data });
   },
 
   insertPegawai: async (pegawai: PegawaiCreate) => {

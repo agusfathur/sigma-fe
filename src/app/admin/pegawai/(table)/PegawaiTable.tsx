@@ -132,7 +132,7 @@ const PegawaiTable = () => {
         heightScreenSize="3xl"
         onClose={() => setIsModalDetailOpen(false)}
       >
-        <PegawaiDetail onSuccess={onSuccess} />
+        <PegawaiDetail />
       </Modal>
     </>
   );
