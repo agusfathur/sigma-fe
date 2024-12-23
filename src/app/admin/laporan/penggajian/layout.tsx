@@ -4,7 +4,6 @@ import {
   IconCashBanknote,
   IconFileScissors,
   IconMoodDollar,
-  IconMoonStars,
 } from "@tabler/icons-react";
 
 export default function LaporanPenggajianLayout({
@@ -45,20 +44,9 @@ const sidebarNavItems = [
     icon: <IconFileScissors size={18} />,
   },
   {
-    title: "Laporan Bonus",
-    href: "/admin/laporan/penggajian/bonus",
-    icon: <IconFileScissors size={18} />,
-  },
-
-  {
     title: "Laporan Tunjangan",
     href: "/admin/laporan/penggajian/tunjangan",
     icon: <IconCashBanknote size={18} />,
-  },
-  {
-    title: "Laporan Lembur",
-    href: "/admin/laporan/penggajian/lembur",
-    icon: <IconMoonStars size={18} />,
   },
   {
     title: "Laporan THR",

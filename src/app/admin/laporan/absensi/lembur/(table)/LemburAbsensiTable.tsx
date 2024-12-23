@@ -8,20 +8,20 @@ import Modal from "@/components/custom/modal";
 import { Button } from "@/components/custom/button";
 import ModalToast from "@/components/custom/modal-toast";
 import { useToastStore } from "@/store/toastStore";
-import { useAbsensiStore } from "@/store/absensi/absensiStore";
-import { RekapAbsensiColumns, RekapAbsensiTypes } from "./RekapAbsensiColumns";
-import { usePegawaiStore } from "@/store/pegawai/pegawaiStore";
-import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
-import { RekapAbsensiPDF } from "../(pdf)/RekapAbsensiPDF";
+import { PDFDownloadLink } from "@react-pdf/renderer";
 import { useDataSekolahStore } from "@/store/dataSekolah/dataSekolahStore";
-import { useJadwalKerjaStore } from "@/store/jadwalKerja/jadwalKerjaStore";
+import { LapLemburPDF } from "../(pdf)/LemburAbsensiPDF";
+import { LemburAbsensiColumns } from "./LemburAbsensiColumns";
+import { useLemburStore } from "@/store/lembur/lemburStore";
+import { Lembur } from "@/store/lembur/lembur.types";
+import { set } from "zod";
 
 interface Option {
   value: string;
   label: string;
 }
 
-const SlipGajiTable = () => {
+const LemburAbsensiTable = () => {
   const {
     isOpen: toastOpen,
     message,
@@ -30,23 +30,20 @@ const SlipGajiTable = () => {
   } = useToastStore();
   const date = new Date();
   const [isModalFilterOpen, setIsModalFilterOpen] = useState(false);
+  const [dataLembur, setDataLembur] = useState<Lembur[]>([]);
 
-  const { fetchPegawaiByFilter, pegawai } = usePegawaiStore();
   const { fetchDataSekolah, dataSekolah } = useDataSekolahStore();
-  const { fetchAllAbsensiByFilter, absensi } = useAbsensiStore();
-  const { fetchJadwalKerjaPegawaiByFilter, jadwalKerja } =
-    useJadwalKerjaStore();
-
-  const [dataRekap, setDataRekap] = useState<RekapAbsensiTypes[]>([]);
+  const { fetchAllLemburByFilter, lembur } = useLemburStore();
 
   const downloadLinkRef = useRef<any>(null);
 
   // filter code start
+  const [filterTanggal, setFilterTanggal] = useState("");
   const [filterTahun, setFilterTahun] = useState("");
   const [filterBulan, setFilterBulan] = useState("");
 
   const [query, setQuery] = useState(
-    `bulan=${date.getMonth() + 1}&tahun=${date.getFullYear()}`,
+    `bulan=${date.getMonth() + 1}&tahun=${date.getFullYear()}&status=diterima`,
   );
   const [tahunOptions, setTahunOptions] = useState<Option[]>([]);
 
@@ -123,16 +120,23 @@ const SlipGajiTable = () => {
     `${getMonthName(date.getMonth() + 1)} ${date.getFullYear()}`,
   );
 
-  const buildDateFilter = (filterBulan: string, filterTahun: string) => {
+  const buildDateFilter = (
+    filterTanggal: string,
+    filterBulan: string,
+    filterTahun: string,
+  ) => {
     const today = new Date();
     const currentYear = today.getFullYear();
 
-    if (filterBulan && filterTahun) {
+    if (filterTanggal) {
+      setTextFilter(filterTanggal);
+      return `tanggal=${filterTanggal}&status=diterima`; // Tanggal
+    } else if (filterBulan && filterTahun) {
       setTextFilter(`${getMonthName(parseInt(filterBulan))} ${filterTahun}`);
-      return `bulan=${filterBulan}&tahun=${filterTahun}`; // Bulan dan tahun
+      return `bulan=${filterBulan}&tahun=${filterTahun}&status=diterima`; // Bulan dan tahun
     } else {
       setTextFilter(`${getMonthName(parseInt(filterBulan))} ${currentYear}`);
-      return `bulan=${filterBulan}&tahun=${currentYear}`; // Bulan dengan tahun saat ini
+      return `bulan=${filterBulan}&tahun=${currentYear}&status=diterima`; // Bulan dengan tahun saat ini
     }
   };
   const getTahunOption = () => {
@@ -146,15 +150,20 @@ const SlipGajiTable = () => {
     setFilterTahun(options.length === 1 ? options[0].value : "");
   };
   const handleFilter = async () => {
-    const filter = buildDateFilter(filterBulan, filterTahun);
+    const filter = buildDateFilter(filterTanggal, filterBulan, filterTahun);
     setQuery(filter);
   };
+
   const handleResetFilter = () => {
+    setFilterTanggal("");
     setFilterBulan("");
     setFilterTahun("");
-    setQuery(`bulan=${date.getMonth() + 1}&tahun=${date.getFullYear()}`);
+    setQuery(
+      `bulan=${date.getMonth() + 1}&tahun=${date.getFullYear()}&status=diterima`,
+    );
     setTextFilter(`${getMonthName(date.getMonth() + 1)} ${date.getFullYear()}`);
   };
+
   // filter code end
 
   const handleDownloadPDF = () => {
@@ -165,64 +174,12 @@ const SlipGajiTable = () => {
   useEffect(() => {
     getTahunOption();
     const initializeData = async () => {
-      await fetchPegawaiByFilter("status=aktif");
-      await fetchAllAbsensiByFilter(query);
+      await fetchAllLemburByFilter(query);
       await fetchDataSekolah();
-
-      // Modified getAbsensiByStatus function
-      const getAbsensiByStatus = (pegawaiId: string, status: string) => {
-        const filteredAbsensi = absensi.filter(
-          (a) =>
-            a.pegawai_id === pegawaiId &&
-            a.status_absen.toLowerCase() === status.toLowerCase(),
-        );
-        return filteredAbsensi;
-      };
-
-      const formattedData: RekapAbsensiTypes[] = await Promise.all(
-        pegawai.map(async (p) => {
-          const jadwalCount = await fetchJadwalKerjaPegawaiByFilter(
-            query,
-            p.id_pegawai,
-          );
-
-          // Get counts for each status
-          const hadirCount = getAbsensiByStatus(p.id_pegawai, "hadir").length;
-          const terlambatCount = getAbsensiByStatus(
-            p.id_pegawai,
-            "terlambat",
-          ).length;
-          const izinCount = getAbsensiByStatus(p.id_pegawai, "izin").length;
-          const cutiCount = getAbsensiByStatus(p.id_pegawai, "cuti").length;
-
-          // Calculate tidak hadir based on jadwal count
-          const tidakHadirCount =
-            jadwalCount.length -
-            (hadirCount + terlambatCount + izinCount + cutiCount);
-
-          return {
-            pegawai: p,
-            countJadwal: jadwalCount.length,
-            countHadir: hadirCount,
-            countTerlambat: terlambatCount,
-            countIzin: izinCount,
-            countCuti: cutiCount,
-            countTidakHadir: tidakHadirCount >= 0 ? tidakHadirCount : 0,
-          };
-        }),
-      );
-
-      setDataRekap(formattedData);
+      setDataLembur(lembur);
     };
     initializeData();
-  }, [
-    fetchAllAbsensiByFilter,
-    fetchDataSekolah,
-    fetchJadwalKerjaPegawaiByFilter,
-    fetchPegawaiByFilter,
-    pegawai,
-    query,
-  ]);
+  }, [query, fetchDataSekolah, fetchAllLemburByFilter, lembur]);
 
   return (
     <>
@@ -240,20 +197,21 @@ const SlipGajiTable = () => {
         </h3>
         <PDFDownloadLink
           document={
-            <RekapAbsensiPDF
-              rekapAbsensi={dataRekap}
+            <LapLemburPDF
+              lembur={dataLembur}
               dataSekolah={dataSekolah}
+              filter={textFilter}
             />
           }
-          fileName={`Rekap Absensi - ${textFilter}.pdf`}
+          fileName={`Laporan Lembur - ${textFilter}.pdf`}
           className="hidden"
           ref={downloadLinkRef}
         >
           Download PDF
         </PDFDownloadLink>
         <DataTable
-          data={dataRekap}
-          columns={RekapAbsensiColumns}
+          data={lembur}
+          columns={LemburAbsensiColumns}
           onFilterChange={() => setIsModalFilterOpen(true)}
           onPrint={handleDownloadPDF}
         />
@@ -264,12 +222,19 @@ const SlipGajiTable = () => {
         {/* filter */}
         <Modal
           isOpen={isModalFilterOpen}
-          textHeader="Filter Absensi"
+          textHeader="Filter Laporan Lembur"
           widthScreenSize="lg"
           onClose={() => setIsModalFilterOpen(false)}
         >
           <div>
-            <h2 className="mb-2 text-sm md:text-base">Bulan</h2>
+            <h2 className="mb-2 text-sm md:text-base">Pilih Tanggal</h2>
+            <input
+              type="date"
+              value={filterTanggal}
+              onChange={(e) => setFilterTanggal(e.target.value)}
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            />
+            <h2 className="mb-2 text-sm md:text-base">Pilih Bulan</h2>
             <select
               value={filterBulan}
               onChange={(e) => setFilterBulan(e.target.value)}
@@ -312,4 +277,4 @@ const SlipGajiTable = () => {
   );
 };
 
-export default SlipGajiTable;
+export default LemburAbsensiTable;

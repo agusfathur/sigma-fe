@@ -42,7 +42,6 @@ export const useTHRStore = create<AbsensiState>((set, get) => ({
       const res = await axiosJWT.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/thr?${filter}`,
       );
-
       set({ tunjanganHariRaya: res.data.data });
     } catch (error) {
       console.log(error);

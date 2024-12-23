@@ -10,6 +10,7 @@ import {
 interface PotongGajiState {
   potongGaji: PotongGaji[];
   fetchPotongGaji: () => Promise<void>;
+  fetchPotongGajiByFilter: (filter: string) => Promise<void>;
   insertPotongGaji: (potongGaji: PotongGajiCreate) => Promise<any>;
   updatePotongGaji: (potongGaji: PotongGajiUpdate) => Promise<any>;
   deletePotongGaji: (id: string) => Promise<any>;
@@ -41,6 +42,17 @@ export const usePotongGajiStore = create<PotongGajiState>((set, get) => ({
       console.log(error);
     }
   },
+  fetchPotongGajiByFilter: async (filter: string) => {
+    try {
+      const res = await axiosJWT.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/potong-gaji?${filter}`,
+      );
+
+      set({ potongGaji: res.data.data });
+    } catch (error) {
+      console.log(error);
+    }
+  },
   insertPotongGaji: async (potongGaji: PotongGajiCreate) => {
     try {
       const create = await axiosJWT.post(
@@ -63,7 +75,6 @@ export const usePotongGajiStore = create<PotongGajiState>((set, get) => ({
       console.log(error);
     }
   },
-
   deletePotongGaji: async (id: string) => {
     try {
       const destroy = await axiosJWT.delete(

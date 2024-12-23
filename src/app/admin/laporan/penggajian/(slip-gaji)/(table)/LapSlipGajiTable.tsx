@@ -8,20 +8,19 @@ import Modal from "@/components/custom/modal";
 import { Button } from "@/components/custom/button";
 import ModalToast from "@/components/custom/modal-toast";
 import { useToastStore } from "@/store/toastStore";
-import { useAbsensiStore } from "@/store/absensi/absensiStore";
-import { RekapAbsensiColumns, RekapAbsensiTypes } from "./RekapAbsensiColumns";
-import { usePegawaiStore } from "@/store/pegawai/pegawaiStore";
-import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
-import { RekapAbsensiPDF } from "../(pdf)/RekapAbsensiPDF";
+import { PDFDownloadLink } from "@react-pdf/renderer";
 import { useDataSekolahStore } from "@/store/dataSekolah/dataSekolahStore";
-import { useJadwalKerjaStore } from "@/store/jadwalKerja/jadwalKerjaStore";
+import { useSlipGajiStore } from "@/store/slipGaji/slipGajiStore";
+import { SlipGaji } from "@/store/slipGaji/slipGaji.types";
+import { LapSlipGajiColumns } from "./LapSlipGajiColumns";
+import { LapSlipGajiPDF } from "../(pdf)/LapSlipGajiPDF";
 
 interface Option {
   value: string;
   label: string;
 }
 
-const RekapAbsensiTable = () => {
+const LapSlipGajiTable = () => {
   const {
     isOpen: toastOpen,
     message,
@@ -30,14 +29,10 @@ const RekapAbsensiTable = () => {
   } = useToastStore();
   const date = new Date();
   const [isModalFilterOpen, setIsModalFilterOpen] = useState(false);
+  const [dataSlipGaji, setDataSlipGaji] = useState<SlipGaji[]>([]);
 
-  const { fetchPegawaiByFilter, pegawai } = usePegawaiStore();
   const { fetchDataSekolah, dataSekolah } = useDataSekolahStore();
-  const { fetchAllAbsensiByFilter, absensi } = useAbsensiStore();
-  const { fetchJadwalKerjaPegawaiByFilter, jadwalKerja } =
-    useJadwalKerjaStore();
-
-  const [dataRekap, setDataRekap] = useState<RekapAbsensiTypes[]>([]);
+  const { fetchSlipGajiByFilter, slipGaji } = useSlipGajiStore();
 
   const downloadLinkRef = useRef<any>(null);
 
@@ -46,7 +41,7 @@ const RekapAbsensiTable = () => {
   const [filterBulan, setFilterBulan] = useState("");
 
   const [query, setQuery] = useState(
-    `bulan=${date.getMonth() + 1}&tahun=${date.getFullYear()}`,
+    `bulan=${date.getMonth() + 1}&tahun=${date.getFullYear()}&status=diterima`,
   );
   const [tahunOptions, setTahunOptions] = useState<Option[]>([]);
 
@@ -165,64 +160,12 @@ const RekapAbsensiTable = () => {
   useEffect(() => {
     getTahunOption();
     const initializeData = async () => {
-      await fetchPegawaiByFilter("status=aktif");
-      await fetchAllAbsensiByFilter(query);
+      await fetchSlipGajiByFilter(query);
       await fetchDataSekolah();
-
-      // Modified getAbsensiByStatus function
-      const getAbsensiByStatus = (pegawaiId: string, status: string) => {
-        const filteredAbsensi = absensi.filter(
-          (a) =>
-            a.pegawai_id === pegawaiId &&
-            a.status_absen.toLowerCase() === status.toLowerCase(),
-        );
-        return filteredAbsensi;
-      };
-
-      const formattedData: RekapAbsensiTypes[] = await Promise.all(
-        pegawai.map(async (p) => {
-          const jadwalCount = await fetchJadwalKerjaPegawaiByFilter(
-            query,
-            p.id_pegawai,
-          );
-
-          // Get counts for each status
-          const hadirCount = getAbsensiByStatus(p.id_pegawai, "hadir").length;
-          const terlambatCount = getAbsensiByStatus(
-            p.id_pegawai,
-            "terlambat",
-          ).length;
-          const izinCount = getAbsensiByStatus(p.id_pegawai, "izin").length;
-          const cutiCount = getAbsensiByStatus(p.id_pegawai, "cuti").length;
-
-          // Calculate tidak hadir based on jadwal count
-          const tidakHadirCount =
-            jadwalCount.length -
-            (hadirCount + terlambatCount + izinCount + cutiCount);
-
-          return {
-            pegawai: p,
-            countJadwal: jadwalCount.length,
-            countHadir: hadirCount,
-            countTerlambat: terlambatCount,
-            countIzin: izinCount,
-            countCuti: cutiCount,
-            countTidakHadir: tidakHadirCount >= 0 ? tidakHadirCount : 0,
-          };
-        }),
-      );
-
-      setDataRekap(formattedData);
+      setDataSlipGaji(slipGaji);
     };
     initializeData();
-  }, [
-    fetchAllAbsensiByFilter,
-    fetchDataSekolah,
-    fetchJadwalKerjaPegawaiByFilter,
-    fetchPegawaiByFilter,
-    pegawai,
-    query,
-  ]);
+  }, [query, fetchSlipGajiByFilter, fetchDataSekolah, slipGaji]);
 
   return (
     <>
@@ -240,20 +183,21 @@ const RekapAbsensiTable = () => {
         </h3>
         <PDFDownloadLink
           document={
-            <RekapAbsensiPDF
-              rekapAbsensi={dataRekap}
+            <LapSlipGajiPDF
+              gaji={dataSlipGaji}
               dataSekolah={dataSekolah}
+              filter={textFilter}
             />
           }
-          fileName={`Rekap Absensi - ${textFilter}.pdf`}
+          fileName={`Laporan Slip Gaji - ${textFilter}.pdf`}
           className="hidden"
           ref={downloadLinkRef}
         >
           Download PDF
         </PDFDownloadLink>
         <DataTable
-          data={dataRekap}
-          columns={RekapAbsensiColumns}
+          data={dataSlipGaji}
+          columns={LapSlipGajiColumns}
           onFilterChange={() => setIsModalFilterOpen(true)}
           onPrint={handleDownloadPDF}
         />
@@ -264,7 +208,7 @@ const RekapAbsensiTable = () => {
         {/* filter */}
         <Modal
           isOpen={isModalFilterOpen}
-          textHeader="Filter Rekap Absensi"
+          textHeader="Filter Laporan Slip Gaji"
           widthScreenSize="lg"
           onClose={() => setIsModalFilterOpen(false)}
         >
@@ -312,4 +256,4 @@ const RekapAbsensiTable = () => {
   );
 };
 
-export default RekapAbsensiTable;
+export default LapSlipGajiTable;

@@ -6,23 +6,25 @@ import {
   Image as ImagePDF,
   Font,
 } from "@react-pdf/renderer";
-import { RekapAbsensiTypes } from "../(table)/RekapAbsensiColumns";
-import stylesPDF from "./stylesPDF";
+import stylesPDF from "./LapPinjamanStylesPDF";
 import { DataSekolah } from "@/store/dataSekolah/dataSekolah.types";
+import { Pinjaman } from "@/store/pinjaman/pinjaman.types";
 
 Font.register({
   family: "Roboto",
   src: "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-light-webfont.ttf",
 });
 
-interface RekapAbsensiPDFProps {
-  rekapAbsensi: RekapAbsensiTypes[];
+interface LapPinjamanPDFProps {
+  pinjamans: Pinjaman[];
   dataSekolah: DataSekolah;
+  filter: string;
 }
 
-export const RekapAbsensiPDF: React.FC<RekapAbsensiPDFProps> = ({
-  rekapAbsensi,
+export const LapPinjamanPDF: React.FC<LapPinjamanPDFProps> = ({
+  pinjamans,
   dataSekolah,
+  filter,
 }) => (
   <Document>
     <Page size="A4" style={stylesPDF.page}>
@@ -58,8 +60,8 @@ export const RekapAbsensiPDF: React.FC<RekapAbsensiPDFProps> = ({
 
       {/* Title */}
       <View style={stylesPDF.titleContainer}>
-        <Text style={stylesPDF.titleMain}>REKAP ABSENSI</Text>
-        <Text style={stylesPDF.titleSub}>BULAN : DESEMBER 2024</Text>
+        <Text style={stylesPDF.titleMain}>Laporan Pinjaman</Text>
+        <Text style={stylesPDF.titleSub}>{filter}</Text>
       </View>
 
       {/* Table */}
@@ -73,58 +75,57 @@ export const RekapAbsensiPDF: React.FC<RekapAbsensiPDFProps> = ({
           <Text style={[stylesPDF.tableCellHeader, stylesPDF.colJabatan]}>
             Jabatan
           </Text>
-          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colAngka]}>
-            Total Jadwal
+          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colText]}>
+            Tanggal
           </Text>
-          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colAngka]}>
-            Hadir
+          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colText]}>
+            Total Pinjaman
           </Text>
-          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colAngka]}>
-            Terlambat
-          </Text>
-          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colAngka]}>
-            Izin
-          </Text>
-          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colAngka]}>
-            Cuti
-          </Text>
-          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colAngka]}>
-            Tidak Hadir
+          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colText]}>
+            Keterangan
           </Text>
         </View>
 
         {/* Table Body */}
-        {rekapAbsensi.map((rekap, index) => (
+        {pinjamans.map((pinjaman, index) => (
           <View key={index} style={stylesPDF.tableRow}>
             <Text style={[stylesPDF.tableCell, stylesPDF.colId]}>
               {index + 1}
             </Text>
             <Text style={[stylesPDF.tableCell, stylesPDF.colNama]}>
-              {rekap.pegawai.nama}
+              {pinjaman.pegawai.nama}
             </Text>
             <Text style={[stylesPDF.tableCell, stylesPDF.colJabatan]}>
-              {rekap.pegawai.jabatan.nama}
+              {pinjaman.pegawai.jabatan.nama}
             </Text>
-            <Text style={[stylesPDF.tableCell, stylesPDF.colAngka]}>
-              {rekap.countJadwal}
+            <Text style={[stylesPDF.tableCell, stylesPDF.colText]}>
+              {new Intl.DateTimeFormat("id-ID", { dateStyle: "long" }).format(
+                new Date(pinjaman.tanggal || ""),
+              )}
             </Text>
-            <Text style={[stylesPDF.tableCell, stylesPDF.colAngka]}>
-              {rekap.countHadir}
+            <Text style={[stylesPDF.tableCell, stylesPDF.colText]}>
+              Rp. {new Intl.NumberFormat("id-ID").format(pinjaman.nominal || 0)}
             </Text>
-            <Text style={[stylesPDF.tableCell, stylesPDF.colAngka]}>
-              {rekap.countTerlambat}
-            </Text>
-            <Text style={[stylesPDF.tableCell, stylesPDF.colAngka]}>
-              {rekap.countIzin}
-            </Text>
-            <Text style={[stylesPDF.tableCell, stylesPDF.colAngka]}>
-              {rekap.countCuti}
-            </Text>
-            <Text style={[stylesPDF.tableCell, stylesPDF.colAngka]}>
-              {rekap.countTidakHadir}
+            <Text style={[stylesPDF.tableCell, stylesPDF.colText]}>
+              {pinjaman.keterangan}
             </Text>
           </View>
         ))}
+      </View>
+
+      {/* Table Footer - Totals */}
+      <View style={[stylesPDF.tableRow, stylesPDF.tableFooter]}>
+        <Text style={[stylesPDF.tableCell, stylesPDF.colId]}></Text>
+        <Text style={[stylesPDF.tableCell, stylesPDF.colNama]}></Text>
+        <Text style={[stylesPDF.tableCell, stylesPDF.colJabatan]}>Total</Text>
+        <Text style={[stylesPDF.tableCell, stylesPDF.colNama]}></Text>
+        <Text style={[stylesPDF.tableCell, stylesPDF.colText]}>
+          Rp.{" "}
+          {new Intl.NumberFormat("id-ID").format(
+            pinjamans.reduce((acc, curr) => acc + (curr.nominal || 0), 0),
+          )}
+        </Text>
+        <Text style={[stylesPDF.tableCell, stylesPDF.colText]}></Text>
       </View>
 
       {/* Footer */}

@@ -8,24 +8,17 @@ import Modal from "@/components/custom/modal";
 import { Button } from "@/components/custom/button";
 import ModalToast from "@/components/custom/modal-toast";
 import { useToastStore } from "@/store/toastStore";
-import { useAbsensiStore } from "@/store/absensi/absensiStore";
-import { usePegawaiStore } from "@/store/pegawai/pegawaiStore";
-import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
-import { RekapAbsensiPDF } from "../(pdf)/RekapKehadiranPDF";
+import { PDFDownloadLink } from "@react-pdf/renderer";
 import { useDataSekolahStore } from "@/store/dataSekolah/dataSekolahStore";
-import {
-  RekapKehadiranColumns,
-  RekapKehadiranTypes,
-} from "./RekapKehadiranColumns";
-import { Absensi } from "@/store/absensi/absensi.types";
-import { set } from "zod";
-
+import { LapTHRColumns } from "./LapSlipGajiColumns";
+import { LapTHRPDF } from "../(pdf)/LapTHRPDF";
+import { useTHRStore } from "@/store/THR/THRStore";
 interface Option {
   value: string;
   label: string;
 }
 
-const RekapKehadiranTable = () => {
+const LapTHRTable = () => {
   const {
     isOpen: toastOpen,
     message,
@@ -35,36 +28,49 @@ const RekapKehadiranTable = () => {
   const date = new Date();
   const [isModalFilterOpen, setIsModalFilterOpen] = useState(false);
 
-  const { fetchPegawaiByFilter, pegawai } = usePegawaiStore();
   const { fetchDataSekolah, dataSekolah } = useDataSekolahStore();
-  const { fetchAllAbsensiByFilter, absensi } = useAbsensiStore();
-
-  const [dataRekap, setDataRekap] = useState<RekapKehadiranTypes[]>([]);
+  const { fetchTHRByFilter, tunjanganHariRaya } = useTHRStore();
 
   const downloadLinkRef = useRef<any>(null);
 
   // filter code start
-  const [filterTanggal, setFilterTanggal] = useState("");
+  const [filterTahun, setFilterTahun] = useState("");
 
-  const tanggal = new Date()
-    .toLocaleDateString("id-ID")
-    .split("/")
-    .map((part) => part.padStart(2, "0"))
-    .reverse()
-    .join("-");
+  const [query, setQuery] = useState(`tahun=${date.getFullYear()}`);
+  const [tahunOptions, setTahunOptions] = useState<Option[]>([]);
 
-  const [query, setQuery] = useState(`tanggal=${tanggal}`);
+  const [textFilter, setTextFilter] = useState(`${date.getFullYear()}`);
 
-  const [textFilter, setTextFilter] = useState(tanggal);
+  const buildDateFilter = (filterTahun: string) => {
+    const today = new Date();
+    const currentYear = today.getFullYear();
 
+    if (filterTahun) {
+      setTextFilter(`${filterTahun}`);
+      return `tahun=${filterTahun}`; // Bulan dan tahun
+    } else {
+      setTextFilter(`${currentYear}`);
+      return `tahun=${currentYear}`; // Bulan dengan tahun saat ini
+    }
+  };
+  const getTahunOption = () => {
+    const tahun = new Date().getFullYear(); // Mendapatkan tahun saat ini
+    const options = [];
+    for (let i = tahun; i >= 2024; i--) {
+      options.push({ value: i.toString(), label: i.toString() });
+    }
+
+    setTahunOptions(options);
+    setFilterTahun(options.length === 1 ? options[0].value : "");
+  };
   const handleFilter = async () => {
-    setTextFilter(filterTanggal);
-    setQuery("tanggal=" + filterTanggal);
+    const filter = buildDateFilter(filterTahun);
+    setQuery(filter);
   };
   const handleResetFilter = () => {
-    setFilterTanggal("");
-    setQuery(`bulan=${date.getMonth() + 1}&tahun=${date.getFullYear()}`);
-    setTextFilter(tanggal);
+    setFilterTahun("");
+    setQuery(`tahun=${date.getFullYear()}`);
+    setTextFilter(`${date.getFullYear()}`);
   };
   // filter code end
 
@@ -74,35 +80,13 @@ const RekapKehadiranTable = () => {
   };
 
   useEffect(() => {
+    getTahunOption();
     const initializeData = async () => {
-      await fetchPegawaiByFilter("status=aktif");
-      await fetchAllAbsensiByFilter(query);
+      await fetchTHRByFilter(query);
       await fetchDataSekolah();
-      const formattedData: RekapKehadiranTypes[] = await Promise.all(
-        pegawai.map((p) => {
-          const getAbsensiByPegawai = (pegawaiId: string) => {
-            const filteredAbsensi = absensi.find(
-              (a) => a.pegawai_id === pegawaiId,
-            );
-            return filteredAbsensi;
-          };
-          return {
-            pegawai: p,
-            absensi: getAbsensiByPegawai(p.id_pegawai) || ({} as Absensi),
-          };
-        }),
-      );
-
-      setDataRekap(formattedData);
     };
     initializeData();
-  }, [
-    fetchAllAbsensiByFilter,
-    fetchDataSekolah,
-    fetchPegawaiByFilter,
-    pegawai,
-    query,
-  ]);
+  }, [query, fetchDataSekolah, fetchTHRByFilter]);
 
   return (
     <>
@@ -120,21 +104,21 @@ const RekapKehadiranTable = () => {
         </h3>
         <PDFDownloadLink
           document={
-            <RekapAbsensiPDF
-              absensi={dataRekap}
+            <LapTHRPDF
+              thr={tunjanganHariRaya}
               dataSekolah={dataSekolah}
               filter={textFilter}
             />
           }
-          fileName={`Kehadiran Harian - ${textFilter}.pdf`}
+          fileName={`Laporan THR - ${textFilter}.pdf`}
           className="hidden"
           ref={downloadLinkRef}
         >
           Download PDF
         </PDFDownloadLink>
         <DataTable
-          data={dataRekap}
-          columns={RekapKehadiranColumns}
+          data={tunjanganHariRaya}
+          columns={LapTHRColumns}
           onFilterChange={() => setIsModalFilterOpen(true)}
           onPrint={handleDownloadPDF}
         />
@@ -145,18 +129,23 @@ const RekapKehadiranTable = () => {
         {/* filter */}
         <Modal
           isOpen={isModalFilterOpen}
-          textHeader="Filter Laporan Kehadiran"
+          textHeader="Filter Laporan THR"
           widthScreenSize="lg"
           onClose={() => setIsModalFilterOpen(false)}
         >
           <div>
-            <h2 className="mb-2 text-sm md:text-base">Tanggal</h2>
-            <input
-              type="date"
-              value={filterTanggal}
-              onChange={(e) => setFilterTanggal(e.target.value)}
-              className="mb-2 w-full rounded-md border border-gray-300 p-2 dark:text-black"
-            />
+            <h2 className="mb-2 text-sm md:text-base">Tahun</h2>
+            <select
+              value={filterTahun}
+              onChange={(e) => setFilterTahun(e.target.value)}
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {tahunOptions.map((tahun, index) => (
+                <option className="text-black" key={index} value={tahun.value}>
+                  {tahun.label}
+                </option>
+              ))}
+            </select>
             <div>
               <Button
                 className="mr-2 mt-2 border-black"
@@ -176,4 +165,4 @@ const RekapKehadiranTable = () => {
   );
 };
 
-export default RekapKehadiranTable;
+export default LapTHRTable;

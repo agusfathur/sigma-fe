@@ -88,6 +88,12 @@ const stylesPDF = StyleSheet.create({
     paddingLeft: 8,
     paddingRight: 8,
   },
+  tableFooter: {
+    borderTop: "1px solid black",
+    paddingTop: 4,
+    marginTop: 4,
+  },
+
   colId: {
     width: "5%",
   },
@@ -97,9 +103,10 @@ const stylesPDF = StyleSheet.create({
   colJabatan: {
     width: "15%",
   },
-  colAngka: {
-    width: "10%",
-    textAlign: "center",
+  colText: {
+    width: "15%",
+    textAlign: "left",
+    textTransform: "capitalize",
   },
   footer: {
     position: "absolute",

@@ -8,20 +8,19 @@ import Modal from "@/components/custom/modal";
 import { Button } from "@/components/custom/button";
 import ModalToast from "@/components/custom/modal-toast";
 import { useToastStore } from "@/store/toastStore";
-import { useAbsensiStore } from "@/store/absensi/absensiStore";
-import { RekapAbsensiColumns, RekapAbsensiTypes } from "./RekapAbsensiColumns";
-import { usePegawaiStore } from "@/store/pegawai/pegawaiStore";
-import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
-import { RekapAbsensiPDF } from "../(pdf)/RekapAbsensiPDF";
+import { PDFDownloadLink } from "@react-pdf/renderer";
 import { useDataSekolahStore } from "@/store/dataSekolah/dataSekolahStore";
-import { useJadwalKerjaStore } from "@/store/jadwalKerja/jadwalKerjaStore";
+import { LaporanIzinCutiColumns } from "./LaporanIzinCutiColumns";
+import { usePermohonanIzinStore } from "@/store/permohonanIzin/permohonanIzinStore";
+import { LapIzinCutiPDF } from "../(pdf)/LapIzinCutiPDF";
+import { PermohonanIzin } from "@/store/permohonanIzin/permohonanIzin.types";
 
 interface Option {
   value: string;
   label: string;
 }
 
-const RekapAbsensiTable = () => {
+const LaporanIzinCutiTable = () => {
   const {
     isOpen: toastOpen,
     message,
@@ -30,14 +29,11 @@ const RekapAbsensiTable = () => {
   } = useToastStore();
   const date = new Date();
   const [isModalFilterOpen, setIsModalFilterOpen] = useState(false);
+  const [dataIzinCuti, setDataIzinCuti] = useState<PermohonanIzin[]>([]);
 
-  const { fetchPegawaiByFilter, pegawai } = usePegawaiStore();
   const { fetchDataSekolah, dataSekolah } = useDataSekolahStore();
-  const { fetchAllAbsensiByFilter, absensi } = useAbsensiStore();
-  const { fetchJadwalKerjaPegawaiByFilter, jadwalKerja } =
-    useJadwalKerjaStore();
-
-  const [dataRekap, setDataRekap] = useState<RekapAbsensiTypes[]>([]);
+  const { fetchPermohonanIzinByFilter, permohonanIzin } =
+    usePermohonanIzinStore();
 
   const downloadLinkRef = useRef<any>(null);
 
@@ -46,7 +42,7 @@ const RekapAbsensiTable = () => {
   const [filterBulan, setFilterBulan] = useState("");
 
   const [query, setQuery] = useState(
-    `bulan=${date.getMonth() + 1}&tahun=${date.getFullYear()}`,
+    `bulan=${date.getMonth() + 1}&tahun=${date.getFullYear()}&status=diterima`,
   );
   const [tahunOptions, setTahunOptions] = useState<Option[]>([]);
 
@@ -129,10 +125,10 @@ const RekapAbsensiTable = () => {
 
     if (filterBulan && filterTahun) {
       setTextFilter(`${getMonthName(parseInt(filterBulan))} ${filterTahun}`);
-      return `bulan=${filterBulan}&tahun=${filterTahun}`; // Bulan dan tahun
+      return `bulan=${filterBulan}&tahun=${filterTahun}&status=diterima`; // Bulan dan tahun
     } else {
       setTextFilter(`${getMonthName(parseInt(filterBulan))} ${currentYear}`);
-      return `bulan=${filterBulan}&tahun=${currentYear}`; // Bulan dengan tahun saat ini
+      return `bulan=${filterBulan}&tahun=${currentYear}&status=diterima`; // Bulan dengan tahun saat ini
     }
   };
   const getTahunOption = () => {
@@ -152,7 +148,9 @@ const RekapAbsensiTable = () => {
   const handleResetFilter = () => {
     setFilterBulan("");
     setFilterTahun("");
-    setQuery(`bulan=${date.getMonth() + 1}&tahun=${date.getFullYear()}`);
+    setQuery(
+      `bulan=${date.getMonth() + 1}&tahun=${date.getFullYear()}&status=diterima`,
+    );
     setTextFilter(`${getMonthName(date.getMonth() + 1)} ${date.getFullYear()}`);
   };
   // filter code end
@@ -165,64 +163,12 @@ const RekapAbsensiTable = () => {
   useEffect(() => {
     getTahunOption();
     const initializeData = async () => {
-      await fetchPegawaiByFilter("status=aktif");
-      await fetchAllAbsensiByFilter(query);
+      await fetchPermohonanIzinByFilter(query);
       await fetchDataSekolah();
-
-      // Modified getAbsensiByStatus function
-      const getAbsensiByStatus = (pegawaiId: string, status: string) => {
-        const filteredAbsensi = absensi.filter(
-          (a) =>
-            a.pegawai_id === pegawaiId &&
-            a.status_absen.toLowerCase() === status.toLowerCase(),
-        );
-        return filteredAbsensi;
-      };
-
-      const formattedData: RekapAbsensiTypes[] = await Promise.all(
-        pegawai.map(async (p) => {
-          const jadwalCount = await fetchJadwalKerjaPegawaiByFilter(
-            query,
-            p.id_pegawai,
-          );
-
-          // Get counts for each status
-          const hadirCount = getAbsensiByStatus(p.id_pegawai, "hadir").length;
-          const terlambatCount = getAbsensiByStatus(
-            p.id_pegawai,
-            "terlambat",
-          ).length;
-          const izinCount = getAbsensiByStatus(p.id_pegawai, "izin").length;
-          const cutiCount = getAbsensiByStatus(p.id_pegawai, "cuti").length;
-
-          // Calculate tidak hadir based on jadwal count
-          const tidakHadirCount =
-            jadwalCount.length -
-            (hadirCount + terlambatCount + izinCount + cutiCount);
-
-          return {
-            pegawai: p,
-            countJadwal: jadwalCount.length,
-            countHadir: hadirCount,
-            countTerlambat: terlambatCount,
-            countIzin: izinCount,
-            countCuti: cutiCount,
-            countTidakHadir: tidakHadirCount >= 0 ? tidakHadirCount : 0,
-          };
-        }),
-      );
-
-      setDataRekap(formattedData);
+      setDataIzinCuti(permohonanIzin);
     };
     initializeData();
-  }, [
-    fetchAllAbsensiByFilter,
-    fetchDataSekolah,
-    fetchJadwalKerjaPegawaiByFilter,
-    fetchPegawaiByFilter,
-    pegawai,
-    query,
-  ]);
+  }, [query, fetchPermohonanIzinByFilter, fetchDataSekolah]);
 
   return (
     <>
@@ -240,20 +186,21 @@ const RekapAbsensiTable = () => {
         </h3>
         <PDFDownloadLink
           document={
-            <RekapAbsensiPDF
-              rekapAbsensi={dataRekap}
+            <LapIzinCutiPDF
+              izinCuti={dataIzinCuti}
               dataSekolah={dataSekolah}
+              filter={textFilter}
             />
           }
-          fileName={`Rekap Absensi - ${textFilter}.pdf`}
+          fileName={`Laporan Izin & Cuti - ${textFilter}.pdf`}
           className="hidden"
           ref={downloadLinkRef}
         >
           Download PDF
         </PDFDownloadLink>
         <DataTable
-          data={dataRekap}
-          columns={RekapAbsensiColumns}
+          data={permohonanIzin}
+          columns={LaporanIzinCutiColumns}
           onFilterChange={() => setIsModalFilterOpen(true)}
           onPrint={handleDownloadPDF}
         />
@@ -264,7 +211,7 @@ const RekapAbsensiTable = () => {
         {/* filter */}
         <Modal
           isOpen={isModalFilterOpen}
-          textHeader="Filter Rekap Absensi"
+          textHeader="Filter Absensi"
           widthScreenSize="lg"
           onClose={() => setIsModalFilterOpen(false)}
         >
@@ -312,4 +259,4 @@ const RekapAbsensiTable = () => {
   );
 };
 
-export default RekapAbsensiTable;
+export default LaporanIzinCutiTable;

@@ -6,23 +6,25 @@ import {
   Image as ImagePDF,
   Font,
 } from "@react-pdf/renderer";
-import { RekapAbsensiTypes } from "../(table)/RekapAbsensiColumns";
-import stylesPDF from "./stylesPDF";
+import stylesPDF from "./LemburAbsensiStylesPDF";
 import { DataSekolah } from "@/store/dataSekolah/dataSekolah.types";
+import { Lembur } from "@/store/lembur/lembur.types";
 
 Font.register({
   family: "Roboto",
   src: "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-light-webfont.ttf",
 });
 
-interface RekapAbsensiPDFProps {
-  rekapAbsensi: RekapAbsensiTypes[];
+interface LapLemburPDFPDFProps {
+  lembur: Lembur[];
   dataSekolah: DataSekolah;
+  filter: string;
 }
 
-export const RekapAbsensiPDF: React.FC<RekapAbsensiPDFProps> = ({
-  rekapAbsensi,
+export const LapLemburPDF: React.FC<LapLemburPDFPDFProps> = ({
+  lembur,
   dataSekolah,
+  filter,
 }) => (
   <Document>
     <Page size="A4" style={stylesPDF.page}>
@@ -58,8 +60,8 @@ export const RekapAbsensiPDF: React.FC<RekapAbsensiPDFProps> = ({
 
       {/* Title */}
       <View style={stylesPDF.titleContainer}>
-        <Text style={stylesPDF.titleMain}>REKAP ABSENSI</Text>
-        <Text style={stylesPDF.titleSub}>BULAN : DESEMBER 2024</Text>
+        <Text style={stylesPDF.titleMain}>Laporan Lembur</Text>
+        <Text style={stylesPDF.titleSub}>{filter}</Text>
       </View>
 
       {/* Table */}
@@ -73,55 +75,57 @@ export const RekapAbsensiPDF: React.FC<RekapAbsensiPDFProps> = ({
           <Text style={[stylesPDF.tableCellHeader, stylesPDF.colJabatan]}>
             Jabatan
           </Text>
-          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colAngka]}>
-            Total Jadwal
+          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colText]}>
+            Tanggal
           </Text>
-          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colAngka]}>
-            Hadir
+          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colText]}>
+            Jam Masuk
           </Text>
-          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colAngka]}>
-            Terlambat
+          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colText]}>
+            Jam Pulang
           </Text>
-          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colAngka]}>
-            Izin
+          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colText]}>
+            Total Jam
           </Text>
-          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colAngka]}>
-            Cuti
-          </Text>
-          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colAngka]}>
-            Tidak Hadir
+          <Text style={[stylesPDF.tableCellHeader, stylesPDF.colText]}>
+            Total Upah
           </Text>
         </View>
 
         {/* Table Body */}
-        {rekapAbsensi.map((rekap, index) => (
+        {lembur.map((izinCuti, index) => (
           <View key={index} style={stylesPDF.tableRow}>
             <Text style={[stylesPDF.tableCell, stylesPDF.colId]}>
               {index + 1}
             </Text>
             <Text style={[stylesPDF.tableCell, stylesPDF.colNama]}>
-              {rekap.pegawai.nama}
+              {izinCuti.absensi.pegawai.nama}
             </Text>
             <Text style={[stylesPDF.tableCell, stylesPDF.colJabatan]}>
-              {rekap.pegawai.jabatan.nama}
+              {izinCuti.absensi.pegawai.jabatan.nama}
             </Text>
-            <Text style={[stylesPDF.tableCell, stylesPDF.colAngka]}>
-              {rekap.countJadwal}
+            <Text style={[stylesPDF.tableCell, stylesPDF.colText]}>
+              {izinCuti.tanggal
+                ? new Intl.DateTimeFormat("id-ID", {
+                    dateStyle: "long",
+                  }).format(new Date(izinCuti.tanggal))
+                : "-"}
             </Text>
-            <Text style={[stylesPDF.tableCell, stylesPDF.colAngka]}>
-              {rekap.countHadir}
+            <Text style={[stylesPDF.tableCell, stylesPDF.colText]}>
+              {izinCuti.absensi.waktu_masuk
+                ? izinCuti.absensi.waktu_masuk
+                : "-"}
             </Text>
-            <Text style={[stylesPDF.tableCell, stylesPDF.colAngka]}>
-              {rekap.countTerlambat}
+            <Text style={[stylesPDF.tableCell, stylesPDF.colText]}>
+              {izinCuti.absensi.waktu_pulang
+                ? izinCuti.absensi.waktu_pulang
+                : "-"}
             </Text>
-            <Text style={[stylesPDF.tableCell, stylesPDF.colAngka]}>
-              {rekap.countIzin}
+            <Text style={[stylesPDF.tableCell, stylesPDF.colText]}>
+              {izinCuti.total_jam} Jam
             </Text>
-            <Text style={[stylesPDF.tableCell, stylesPDF.colAngka]}>
-              {rekap.countCuti}
-            </Text>
-            <Text style={[stylesPDF.tableCell, stylesPDF.colAngka]}>
-              {rekap.countTidakHadir}
+            <Text style={[stylesPDF.tableCell, stylesPDF.colText]}>
+              Rp. {new Intl.NumberFormat("id-Id").format(izinCuti.total_upah)}
             </Text>
           </View>
         ))}
